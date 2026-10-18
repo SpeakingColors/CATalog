@@ -1,0 +1,12 @@
+# Roadmap: CATalog
+
+Sample manager.
+
+## Next
+- [ ] Folder scanning and tagging
+- [ ] Audition and drag to the DAW
+- [ ] Waveform library shared with SupurrSaw (single-cycle WAVs)
+
+## Every cat plugin
+- Draw through `catui::RenderGate` so meters and animations stop when the window is not in front (audio, automation and MIDI keep running)
+- Settings page with MIDI filters on by default, selectable preset/backup folders, UI size reset to 100%
