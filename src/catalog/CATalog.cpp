@@ -3,7 +3,8 @@
 CATalogProcessor::CATalogProcessor()
     : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true))
 {
-    formats.registerBasicFormats();
+    formats.registerBasicFormats();      // wav, aiff, flac, ogg, mp3 (JUCE_USE_MP3AUDIOFORMAT), plus m4a / aac / wma where the OS decoder exists
+    loadSettings();
 }
 CATalogProcessor::~CATalogProcessor() { transport.setSource(nullptr); }
 
@@ -22,12 +23,67 @@ juce::File CATalogProcessor::metaFile() const
 }
 void CATalogProcessor::saveMeta() const { auto f = metaFile(); f.getParentDirectory().createDirectory(); library.saveMeta(f.getFullPathName().toStdString()); }
 
+juce::File CATalogProcessor::settingsFile() const { return metaFile().getSiblingFile("settings.txt"); }
+void CATalogProcessor::saveSettings() const
+{
+    juce::String t; for (auto& r : library.roots) t << "root\t" << juce::String(r) << "\n"; if (watchFolder != juce::File()) t << "watch\t" << watchFolder.getFullPathName() << "\n";
+    auto f = settingsFile(); f.getParentDirectory().createDirectory(); f.replaceWithText(t);
+}
+void CATalogProcessor::loadSettings()
+{
+    juce::StringArray lines; lines.addLines(settingsFile().loadFileAsString());
+    for (auto& l : lines) { const auto tab = l.indexOfChar('\t'); if (tab < 0) continue; const auto k = l.substring(0, tab); const juce::File f(l.substring(tab + 1));
+        if (!f.isDirectory()) continue; if (k == "root") library.importFolder(f.getFullPathName().toStdString()); else if (k == "watch") { watchFolder = f; watchSig = catalog::Library::folderSignature(f.getFullPathName().toStdString()); } }
+    if (!library.roots.empty()) library.loadMeta(metaFile().getFullPathName().toStdString());
+}
 int CATalogProcessor::scanFolder(const juce::File& dir)
 {
     libraryFolder = dir;
     const int n = library.scan(dir.getFullPathName().toStdString());
-    library.loadMeta(metaFile().getFullPathName().toStdString());
+    library.loadMeta(metaFile().getFullPathName().toStdString()); saveSettings();
     return n;
+}
+int CATalogProcessor::importFolder(const juce::File& dir)
+{
+    libraryFolder = dir; const int n = library.importFolder(dir.getFullPathName().toStdString());     // recursive: every subfolder is read
+    library.loadMeta(metaFile().getFullPathName().toStdString()); saveSettings(); return n;
+}
+void CATalogProcessor::setWatchFolder(const juce::File& dir)
+{
+    watchFolder = dir; if (!dir.isDirectory()) return;
+    importFolder(dir); watchSig = catalog::Library::folderSignature(dir.getFullPathName().toStdString()); saveSettings();
+}
+bool CATalogProcessor::pollWatch()
+{
+    if (!watchFolder.isDirectory()) return false;
+    const auto sig = catalog::Library::folderSignature(watchFolder.getFullPathName().toStdString()); if (sig == watchSig) return false;
+    watchSig = sig; library.rescanAll(); library.loadMeta(metaFile().getFullPathName().toStdString()); return true;
+}
+int CATalogProcessor::analysePending(int maxFiles)
+{
+    int done = 0;
+    for (auto& s : library.samples)
+    {
+        if (s.analysed) continue; if (done >= maxFiles) break; ++done;
+        std::unique_ptr<juce::AudioFormatReader> r(formats.createReaderFor(juce::File(s.path)));
+        if (r == nullptr || r->lengthInSamples <= 0 || r->sampleRate <= 0) { s.analysed = true; continue; }          // unreadable: do not retry every time
+        const int n = (int) std::min<juce::int64>(r->lengthInSamples, (juce::int64)(r->sampleRate * 40.0));         // the first 40 seconds are enough
+        juce::AudioBuffer<float> buf((int) r->numChannels, n); r->read(&buf, 0, n, 0, true, true);
+        std::vector<float> mono((size_t) n, 0.f);
+        for (int c = 0; c < buf.getNumChannels(); ++c) { const float* p = buf.getReadPointer(c); for (int i = 0; i < n; ++i) mono[(size_t) i] += p[i] / (float) buf.getNumChannels(); }
+        auto info = catalog::analyse(mono, r->sampleRate); info.duration = (double) r->lengthInSamples / r->sampleRate;
+        catalog::Library::applyAnalysis(s, info);
+    }
+    return done;
+}
+bool CATalogProcessor::openSplice() const
+{
+   #if JUCE_WINDOWS
+    for (auto base : { juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getParentDirectory().getChildFile("Local/Programs/Splice/Splice.exe"), juce::File("C:/Program Files/Splice/Splice.exe") }) if (base.existsAsFile()) return base.startAsProcess();
+   #elif JUCE_MAC
+    if (juce::File("/Applications/Splice.app").exists()) return juce::File("/Applications/Splice.app").startAsProcess();
+   #endif
+    return juce::URL("https://splice.com").launchInDefaultBrowser();          // not installed: open the site; you sign in there yourself
 }
 
 void CATalogProcessor::audition(const catalog::Sample& s)
@@ -42,43 +98,69 @@ void CATalogProcessor::audition(const catalog::Sample& s)
 }
 
 namespace {
-class CATalogEditor : public juce::AudioProcessorEditor, private juce::ListBoxModel, private juce::TextEditor::Listener
+class CATalogEditor : public juce::AudioProcessorEditor, private juce::ListBoxModel, private juce::TextEditor::Listener, private juce::Timer
 {
 public:
     explicit CATalogEditor(CATalogProcessor& p) : AudioProcessorEditor(p), proc(p)
     {
-        addAndMakeVisible(choose); addAndMakeVisible(search); addAndMakeVisible(list); addAndMakeVisible(info);
-        choose.setButtonText("Choose sample folder..."); search.setTextToShowWhenEmpty("Search: words in name, tag, key, folder", juce::Colours::grey); search.addListener(this);
-        list.setModel(this); list.setRowHeight(22);
-        choose.onClick = [this] {
-            chooser = std::make_unique<juce::FileChooser>("Pick your sample folder");
+        for (auto* c : std::initializer_list<juce::Component*> { &importB, &watchB, &spliceB, &typeBox, &search, &list, &info, &stems }) addAndMakeVisible(c);
+        importB.setButtonText("Import folder..."); watchB.setButtonText("Splice save folder..."); spliceB.setButtonText("Open Splice");
+        search.setTextToShowWhenEmpty("Search: words in name, tag, key, folder, type", juce::Colours::grey); search.addListener(this);
+        typeBox.addItem("All types", 1); int id = 2; for (auto t : types) typeBox.addItem(t, id++); typeBox.setSelectedId(1, juce::dontSendNotification); typeBox.onChange = [this] { refresh(); };
+        list.setModel(this); list.setRowHeight(22); stems.setJustificationType(juce::Justification::topLeft);
+        importB.setTooltip("Adds a folder and everything in its subfolders. You can add as many as you like.");
+        watchB.setTooltip("Choose the folder Splice saves your downloads into. CATalog watches it and picks up new files. There is no Splice login here: Splice has no public API.");
+        spliceB.setTooltip("Opens the Splice app (or splice.com). You sign in and download there.");
+        importB.onClick = [this] {
+            chooser = std::make_unique<juce::FileChooser>("Pick a sample folder (subfolders are included)");
             chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories, [this](const juce::FileChooser& c) {
-                if (c.getResult().isDirectory()) { proc.scanFolder(c.getResult()); refresh(); } });
-        };
-        setSize(720, 520); refresh();
+                if (c.getResult().isDirectory()) { proc.importFolder(c.getResult()); proc.analysePending(); refresh(); } }); };
+        watchB.onClick = [this] {
+            chooser = std::make_unique<juce::FileChooser>("Pick the folder Splice saves into");
+            chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories, [this](const juce::FileChooser& c) {
+                if (c.getResult().isDirectory()) { proc.setWatchFolder(c.getResult()); proc.analysePending(); refresh(); } }); };
+        spliceB.onClick = [this] { proc.openSplice(); };
+        setSize(820, 560); refresh(); startTimer(3000);
     }
-    void resized() override { auto r = getLocalBounds().reduced(8); auto top = r.removeFromTop(28); choose.setBounds(top.removeFromLeft(200)); top.removeFromLeft(6); search.setBounds(top); r.removeFromTop(6); info.setBounds(r.removeFromBottom(22)); list.setBounds(r); }
+    void resized() override
+    {
+        auto r = getLocalBounds().reduced(8); auto top = r.removeFromTop(28);
+        importB.setBounds(top.removeFromLeft(130)); top.removeFromLeft(4); watchB.setBounds(top.removeFromLeft(150)); top.removeFromLeft(4); spliceB.setBounds(top.removeFromLeft(100)); top.removeFromLeft(4); typeBox.setBounds(top.removeFromLeft(110)); top.removeFromLeft(4); search.setBounds(top);
+        r.removeFromTop(6); info.setBounds(r.removeFromBottom(22)); stems.setBounds(r.removeFromBottom(54)); list.setBounds(r);
+    }
     int getNumRows() override { return (int) rows.size(); }
     void paintListBoxItem(int row, juce::Graphics& g, int w, int h, bool sel) override
     {
         if (row < 0 || row >= (int) rows.size()) return; const auto& s = *rows[(size_t) row];
         if (sel) g.fillAll(juce::Colours::darkslategrey); g.setColour(juce::Colours::white); g.setFont(14.f);
-        g.drawText(juce::String(s.fav ? juce::CharPointer_UTF8("\xe2\x98\x85 ") : "  ") + s.name, 6, 0, w - 330, h, juce::Justification::centredLeft, true);
+        g.drawText(juce::String(s.fav ? juce::CharPointer_UTF8("\xe2\x98\x85 ") : "  ") + s.name, 6, 0, w - 460, h, juce::Justification::centredLeft, true);
         g.setColour(juce::Colours::lightgrey);
-        g.drawText((s.bpm > 0 ? juce::String((int) s.bpm) + " bpm" : juce::String()), w - 320, 0, 70, h, juce::Justification::centredLeft);
-        g.drawText(s.key, w - 245, 0, 50, h, juce::Justification::centredLeft);
-        juce::String t; for (auto& x : s.tags) t << (t.isEmpty() ? "" : ", ") << x; g.drawText(t, w - 190, 0, 184, h, juce::Justification::centredLeft, true);
+        g.drawText(s.type.empty() ? juce::String("?") : juce::String(s.type), w - 450, 0, 80, h, juce::Justification::centredLeft);
+        g.drawText(s.genre, w - 365, 0, 90, h, juce::Justification::centredLeft);
+        g.drawText((s.bpm > 0 ? juce::String((int) std::lround(s.bpm)) + " bpm" : juce::String()), w - 270, 0, 70, h, juce::Justification::centredLeft);
+        g.drawText(s.key, w - 195, 0, 50, h, juce::Justification::centredLeft);
+        juce::String t; for (auto& x : s.tags) t << (t.isEmpty() ? "" : ", ") << x; g.drawText(t, w - 140, 0, 134, h, juce::Justification::centredLeft, true);
     }
-    void selectedRowsChanged(int row) override { if (row >= 0 && row < (int) rows.size()) proc.audition(*rows[(size_t) row]); }
+    void selectedRowsChanged(int row) override
+    {
+        if (row < 0 || row >= (int) rows.size()) return; proc.audition(*rows[(size_t) row]);
+        const auto st = proc.library.stemsOf(*rows[(size_t) row]);
+        if (st.empty()) stems.setText("Stems: none found next to this file. CATalog lists stem files that sit beside a loop (names like Loop_drums, Loop_bass, Loop_vocals, Loop_other, or a folder \"Loop stems\"). It does not split audio into stems itself.", juce::dontSendNotification);
+        else { juce::String t = "Stems found: "; for (auto& x : st) t << x.kind << " (" << juce::File(juce::String(proc.library.byRel(x.rel) ? proc.library.byRel(x.rel)->path : x.rel)).getFileName() << ")  "; stems.setText(t, juce::dontSendNotification); }
+    }
     void listBoxItemDoubleClicked(int row, const juce::MouseEvent&) override { if (row >= 0 && row < (int) rows.size()) { auto* s = const_cast<catalog::Sample*>(rows[(size_t) row]); s->fav = !s->fav; proc.saveMeta(); list.repaintRow(row); } }
     void textEditorTextChanged(juce::TextEditor&) override { refresh(); }
+    void timerCallback() override { bool changed = proc.pollWatch(); if (proc.analysePending(6) > 0) changed = true; if (changed) refresh(); }
 private:
     void refresh()
     {
-        catalog::Query q; q.text = search.getText().toStdString(); rows = proc.library.find(q); list.updateContent(); list.repaint();
-        info.setText(juce::String((int) rows.size()) + " of " + juce::String((int) proc.library.samples.size()) + " samples. Click to listen, double click for favourite.", juce::dontSendNotification);
+        catalog::Query q; q.text = search.getText().toStdString(); const int id = typeBox.getSelectedId(); if (id > 1) q.type = types[id - 2].toStdString();
+        rows = proc.library.find(q); list.updateContent(); list.repaint(); int pend = 0; for (auto& s : proc.library.samples) if (!s.analysed) ++pend;
+        info.setText(juce::String((int) rows.size()) + " of " + juce::String((int) proc.library.samples.size()) + " samples in " + juce::String((int) proc.library.roots.size()) + " folder(s)." + (pend ? " Analysing " + juce::String(pend) + " more..." : juce::String())
+                     + (proc.watchFolder != juce::File() ? " Watching: " + proc.watchFolder.getFullPathName() : juce::String()), juce::dontSendNotification);
     }
-    CATalogProcessor& proc; juce::TextButton choose; juce::TextEditor search; juce::ListBox list; juce::Label info;
+    CATalogProcessor& proc; juce::TextButton importB, watchB, spliceB; juce::ComboBox typeBox; juce::TextEditor search; juce::ListBox list; juce::Label info, stems;
+    juce::StringArray types { "kick", "snare", "clap", "hat", "perc", "bass", "synth", "stab", "pad", "lead", "vocal", "fx", "loop", "drum loop", "unknown" };
     std::vector<const catalog::Sample*> rows; std::unique_ptr<juce::FileChooser> chooser;
 };
 }
@@ -88,5 +170,5 @@ void CATalogProcessor::getStateInformation(juce::MemoryBlock& dest) { juce::Memo
 void CATalogProcessor::setStateInformation(const void* d, int n)
 {
     juce::MemoryInputStream m(d, (size_t) n, false); const juce::File f(m.readString());
-    if (f.isDirectory()) scanFolder(f);
+    if (f.isDirectory()) importFolder(f);          // adds it (nothing happens if it is already there)
 }

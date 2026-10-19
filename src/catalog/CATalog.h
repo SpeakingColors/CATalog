@@ -31,15 +31,21 @@ public:
     void setStateInformation(const void*, int) override;
 
     // message thread
-    int scanFolder(const juce::File& dir);
+    int scanFolder(const juce::File& dir);                 // replaces the library with this folder (and all its subfolders)
+    int importFolder(const juce::File& dir);               // adds a folder and all its subfolders; returns new samples
+    void setWatchFolder(const juce::File& dir);            // e.g. the folder Splice saves into; polled by pollWatch()
+    bool pollWatch();                                      // true if the folder changed and the library was refreshed
+    int analysePending(int maxFiles = 40);                 // decodes and analyses samples not yet analysed (any format JUCE can read)
+    bool openSplice() const;                               // opens the Splice desktop app if installed; never handles a login
+    void saveSettings() const;
     void audition(const catalog::Sample& s);
     void stopAudition() { transport.stop(); }
     void saveMeta() const;
     catalog::Library library;
-    juce::File libraryFolder;
+    juce::File libraryFolder, watchFolder; std::string watchSig;
 
 private:
-    juce::File metaFile() const;
+    juce::File metaFile() const; juce::File settingsFile() const; void loadSettings();
     juce::AudioFormatManager formats; juce::AudioTransportSource transport; std::unique_ptr<juce::AudioFormatReaderSource> source;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CATalogProcessor)
 };

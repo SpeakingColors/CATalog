@@ -143,7 +143,7 @@ button[aria-pressed="true"],button.on { background:color-mix(in srgb,var(--cL) 1
 .lnk { cursor:pointer; color:var(--cL); text-transform:none; letter-spacing:0; font-size:12px; }
 #q { flex:1 1 200px; min-width:120px; background:#0a0b0e; color:var(--ink); border:1px solid var(--line); border-radius:3px; padding:7px 10px; font-size:15px; font-family:inherit; }
 .tbl { flex:1 1 auto; overflow:auto; border:1px solid var(--line); border-radius:4px; background:#0b0c10; min-height:0; }
-.tr { display:grid; grid-template-columns:24px minmax(0,1.6fr) 56px 50px 54px minmax(0,1.2fr) 70px; gap:6px; align-items:center; padding:4px 8px; border-bottom:1px solid #15171d; font-size:14px; cursor:pointer; }
+.tr { display:grid; grid-template-columns:24px minmax(0,1.5fr) 66px 78px 48px 46px 58px minmax(0,1fr) 56px; gap:6px; align-items:center; padding:4px 8px; border-bottom:1px solid #15171d; font-size:14px; cursor:pointer; }
 .tr:hover { background:#14161c; } .tr.sel { background:color-mix(in srgb,var(--cL) 16%,#0a0a0c); } .tr.hd { position:sticky; top:0; background:#14161c; color:var(--ink-dim); font-size:11px; letter-spacing:.16em; text-transform:uppercase; z-index:1; cursor:default; }
 .tr .mn { font-family:var(--f-num); font-size:12px; color:var(--cAcc); } .tr .tg { color:var(--ink-dim); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .tr .st { color:var(--cAcc); cursor:pointer; }
 .pname { font-size:18px; letter-spacing:.05em; color:var(--cL); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -154,6 +154,18 @@ button[aria-pressed="true"],button.on { background:color-mix(in srgb,var(--cL) 1
 .fakeweb { margin-top:10px; border:1px solid var(--line); border-radius:4px; overflow:hidden; } .fwbar { background:#14161c; padding:6px 10px; font-family:var(--f-num); font-size:12px; color:var(--ink-dim); } .fwbody { height:260px; display:grid; place-items:center; color:var(--ink-dim); background:#0a0b0e; }
 .cmp .kw { width:auto; }
 
+.tfilter { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.tfilter .chip { padding:3px 9px; }
+.tfilter .lab { color:var(--ink-dim); font-size:11px; letter-spacing:.16em; text-transform:uppercase; margin-right:4px; }
+.tr.hd { gap:6px; letter-spacing:.08em; } .tr .ty { font-size:12px; color:#d6d8de; text-transform:lowercase; } .tr .ty.q { color:var(--ink-dim); } .tr .ty.au { color:var(--cL); } .tr .gn { font-size:12px; color:var(--ink-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.imp { display:flex; flex-direction:column; gap:5px; } .imp button { text-align:center; } .imp small { color:var(--ink-dim); font-size:12px; line-height:1.35; }
+.dropov { position:fixed; inset:0; z-index:90; display:none; place-items:center; background:rgba(10,10,14,.82); color:#fff; font-size:26px; letter-spacing:.14em; text-transform:uppercase; border:3px dashed var(--cL); pointer-events:none; } .dropov.on { display:grid; }
+.steps { margin:8px 0 10px 18px; padding:0; line-height:1.55; } .spst { margin:8px 0; font-size:14px; color:#d6d8de; } .spst b { color:var(--cAcc); font-weight:600; }
+.stems div.ok { border-color:var(--cL); color:#e8eaf0; cursor:pointer; } .stems div.ok:hover { background:#14161c; } .stems div.no { opacity:.5; } .stems div small { display:block; margin-top:4px; letter-spacing:0; text-transform:none; font-size:12px; color:var(--ink-dim); }
+.stems { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+.rowf { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+select.mini { background:#0a0b0e; color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:3px 6px; font:inherit; font-size:13px; }
+.spl { display:flex; flex-direction:column; gap:2px; max-height:150px; overflow:auto; border:1px solid var(--line); border-radius:4px; background:#0b0c10; } .spl div { padding:3px 8px; font-size:13px; display:flex; justify-content:space-between; gap:10px; border-bottom:1px solid #15171d; } .spl small { color:var(--ink-dim); }
 </style>
 <div id="desk"><div id="frame"><div id="win">
 <div class="unit" id="unit">
@@ -181,23 +193,33 @@ button[aria-pressed="true"],button.on { background:color-mix(in srgb,var(--cL) 1
     <div class="pbody" id="pbody">
       <nav class="tabs" role="tablist" id="tabs" aria-label="View">
         <button data-view="lib" data-tip="Your sample library: folders, tags, search and a preview player. Shortcut: 1.">Library</button>
-        <button data-view="stems" data-tip="Split a loop into stems (drums, bass, vocals, other). Plugin only in this mockup. Shortcut: 2.">Stems</button>
-        <button data-view="web" data-tip="Browse Splice in a tab inside the app (layout only in this mockup). Shortcut: 3.">Splice tab</button>
+        <button data-view="stems" data-tip="Stem files found next to the selected loop (names like Loop_drums, Loop_bass). Shortcut: 2.">Stems</button>
+        <button data-view="web" data-tip="Pick the folder Splice saves into and watch it. No Splice login in CATalog. Shortcut: 3.">Splice</button>
       </nav>
       <section class="main" id="mainRow">
         <aside class="side" aria-label="Folders and tags">
-          <h3 class="sh"><span>Folders</span><button id="bAddFolder" data-tip="Scan a folder on your computer. Files are read in this browser tab only and never uploaded.">+ Folder</button></h3>
-          <input type="file" id="dirIn" webkitdirectory multiple hidden><input type="file" id="fileIn" accept="audio/*" multiple hidden>
+          <h3 class="sh"><span>Import</span></h3>
+          <div class="imp"><button id="bAddFolder" class="on" data-tip="Add a folder of samples. Every subfolder inside it is read too, at any depth. Files stay on your computer; in this browser mockup they are read in this tab only and never uploaded.">Import folder</button><button id="bAddFiles" data-tip="Add single audio files.">Add files</button>
+            <small>Subfolders are included. You can also drag a folder onto this window.</small><small>Reads wav, aiff, flac, mp3, ogg, m4a and more (the browser decides which it can play).</small><small id="impMsg"></small><small id="anNote" style="color:var(--cAcc)"></small></div>
+          <input type="file" id="dirIn" webkitdirectory multiple hidden><input type="file" id="fileIn" accept="audio/*,.aif,.aiff,.flac,.m4a,.opus,.wma,.caf" multiple hidden><input type="file" id="spIn" webkitdirectory multiple hidden>
+          <h3 class="sh"><span>Folders</span></h3>
           <div class="tree" id="tree"></div>
           <h3 class="sh"><span>Tags</span><span id="tagClear" class="lnk" data-tip="Clear the tag filter.">clear</span></h3>
           <div class="chips" id="chips"></div>
         </aside>
         <div class="center" id="vLib">
-          <div class="row2"><input type="search" id="q" placeholder="Search names and tags" data-tip="Type to filter by name, tag, key or BPM."><label class="fld"><span>Sort</span><select id="sort"><option value="name">Name</option><option value="bpm">BPM</option><option value="key">Key</option><option value="len">Length</option><option value="rate">Rating</option></select></label><button id="bFav" data-tip="Show only favourites.">&#9733; Favourites</button><span class="note" id="count"></span></div>
+          <div class="tfilter" id="tbar" aria-label="Filter by type"></div>
+          <div class="row2"><input type="search" id="q" placeholder="Search names, tags, type, genre" data-tip="Type to filter by name, tag, key or BPM."><label class="fld"><span>Genre</span><select id="gsel" class="mini"></select></label><label class="fld"><span>Key</span><select id="ksel" class="mini"></select></label><label class="fld"><span>Sort</span><select id="sort"><option value="name">Name</option><option value="bpm">BPM</option><option value="key">Key</option><option value="len">Length</option><option value="rate">Rating</option></select></label><button id="bFav" data-tip="Show only favourites.">&#9733; Favourites</button><span class="note" id="count"></span></div>
           <div class="tbl" id="tbl"></div>
         </div>
-        <div class="center" id="vStems" hidden><div class="stemmsg"><h3>Stems</h3><p>Pick a loop in the Library, then split it into drums, bass, vocals and other. The plugin will do this offline with an open source separation model. The mockup does not separate audio.</p><div class="stems" id="stemBox"></div></div></div>
-        <div class="center" id="vWeb" hidden><div class="stemmsg"><h3>Splice tab</h3><p>The app shows the Splice website in a tab, so you can search, preview and download packs without leaving CATalog. Downloads land in your watched folder and appear in the library. This page only shows the layout; it does not connect to Splice.</p><div class="fakeweb"><div class="fwbar">splice.com</div><div class="fwbody">Your Splice session appears here.</div></div></div></div>
+        <div class="center" id="vStems" hidden><div class="stemmsg" id="stemMsg"></div></div>
+        <div class="center" id="vWeb" hidden><div class="stemmsg"><h3>Splice</h3>
+          <p><b>No login here, on purpose.</b> Splice has no public API for other apps, so CATalog cannot sign in to your account or browse its catalogue. You search and download in the Splice app or on splice.com; CATalog picks the files up from the folder Splice saves into.</p>
+          <ol class="steps"><li>Open Splice and sign in there.</li><li>Choose the folder Splice saves its downloads into (see the download location in the Splice app's settings).</li><li>Switch on Watch. New files appear in the Library under that folder, analysed and sorted.</li></ol>
+          <div class="rowf"><button id="bSpOpen" class="on" data-tip="Opens splice.com in a new tab. In the plugin it opens the Splice app if it is installed. You sign in there, never here.">Open Splice</button><button id="bSpPick" data-tip="Pick the folder Splice downloads into. Subfolders are included.">Choose Splice save folder</button><button id="bSpWatch" data-tip="Keep looking at that folder and import new files as they arrive.">Watch this folder</button><button id="bSpScan" data-tip="Look at the folder now.">Check now</button></div>
+          <div class="spst" id="spStatus"></div>
+          <h3 style="margin-top:12px">Imported from this folder</h3><div class="spl" id="spList"></div>
+          <p class="note" id="spNote" style="color:var(--ink-dim);font-size:13px;margin-top:8px"></p></div></div>
         <aside class="prev" aria-label="Preview">
           <h3 class="sh"><span>Preview</span><span id="pvInfo"></span></h3>
           <div class="pname" id="pvName">Nothing selected</div>
@@ -205,6 +227,7 @@ button[aria-pressed="true"],button.on { background:color-mix(in srgb,var(--cL) 1
           <div class="row2"><button id="bPlay" data-tip="Play the selected sample. Shortcut: Space.">&#9654; Play</button><button id="bLoop" data-tip="Loop the sample.">Loop</button><button id="bAuto" data-tip="Play a sample as soon as you select it.">Auto-play</button></div>
           <div class="cv" style="height:90px"><canvas id="cvSp"></canvas></div>
           <div class="row2 cmp" id="pvK"></div>
+          <div class="row2" id="pvType"></div>
           <div class="row2" id="pvTags"></div>
           <div class="row2"><button id="bFavOne" data-tip="Mark as favourite.">&#9734; Favourite</button><span id="rate" class="stars" data-tip="Rate it: click a star."></span></div>
           <div class="drag" id="dragBox" draggable="true" data-tip="Drag this to your DAW or desktop. In a browser it saves a WAV; in the plugin it drops the sample on a track.">&#8645; Drag to DAW</div>
@@ -215,7 +238,7 @@ button[aria-pressed="true"],button.on { background:color-mix(in srgb,var(--cL) 1
       </section>
 
     </div>
-    <footer class="foot"><span><b>Studio 87</b> &middot; CATalog v0.1 design mockup</span><span id="sizeT" data-tip="Window size. Drag any edge or corner of the plugin to resize it; the shape stays the same. Double-click here for 100 %.">Window 100 %</span><span>Free and open source. Collects nothing.</span></footer>
+    <footer class="foot"><span><b>Studio 87</b> &middot; CATalog v0.1 design mockup</span><span id="sizeT" data-tip="Window size. Drag any edge or corner of the plugin to resize it; the shape stays the same. Double-click here for 100 %.">Window 100 %</span></footer>
   </div>
   <div class="cheek r"></div>
 </div>
@@ -940,34 +963,157 @@ function buildLibrary() {
   add("Acid 130", "Loops/Synth", ["loop", "acid", "303"], "loop", mkLoop(genAcid), 130, "A");
   add("Hoover 140", "Loops/Synth", ["loop", "hoover", "lead"], "loop", mkLoop(genHoover), 140, "A");
   add("Vox Line 140", "Loops/Vocals", ["loop", "vocal"], "loop", mkLoop(genVox), 140, "Am");
+  add("Hoover 140_bass", "Loops/Synth", ["loop", "stem"], "loop", mkLoop(function () { var b = mkBass(55, 6.4, 700)(); var o = mono(Math.round(sr * 6.4)); for (var i = 0; i < o.length; i++) o[i] = b[i % b.length] * 0.8; return { buf: { getChannelData: function () { return o; } } }; }), 140, "A");
+  add("Hoover 140_drums", "Loops/Synth", ["loop", "stem"], "loop", mkLoop(genHard), 140);
+  D.forEach(function (d) { d.type = guessType(d.name, d.folder); d.typeSrc = d.type ? "name" : ""; d.genre = guessGenre(d.name, d.folder); d.analysed = true; d.demo = true; });
   return D;
 }
 function sampleBuf(d) { if (!d.buf) { d.buf = d.gen(); var pk = 0, i; for (i = 0; i < d.buf.length; i++) pk = Math.max(pk, Math.abs(d.buf[i])); if (pk > 0) for (i = 0; i < d.buf.length; i++) d.buf[i] *= 0.9 / pk; } return d.buf; }
 
+/* ===== v2: classification (names + audio), analysis, import, stems, Splice folder ===== */
+var AUDIO_RE = /\.(wav|wave|bwf|aif|aiff|aifc|flac|ogg|oga|opus|mp3|m4a|mp4|aac|wma|caf|w64|webm)$/i;
+var TYPES = ["kick", "snare", "clap", "hat", "perc", "bass", "synth", "stab", "pad", "lead", "vocal", "fx", "loop", "drum loop"];
+function cwords(s) { var w = [], cur = "", c; for (var i = 0; i <= s.length; i++) { c = i < s.length ? s[i] : " "; if (/[A-Za-z0-9]/.test(c)) { if (cur && /[A-Z]/.test(c) && /[a-z]/.test(cur[cur.length - 1])) { w.push(cur.toLowerCase()); cur = ""; } cur += c; } else { if (cur) w.push(cur.toLowerCase()); cur = ""; } } return w; }
+function hasW(w, list) { return w.some(function (x) { return list.indexOf(x) >= 0; }); }
+var TYPE_RULES = [["kick", "kick kicks bd bassdrum"], ["snare", "snare snares sn rimshot rim"], ["clap", "clap claps"], ["hat", "hat hats hihat hihats hh ohh chh cymbal cymbals ride shaker shakers"], ["perc", "perc percussion tom toms conga bongo tambourine cowbell clave"],
+  ["vocal", "vocal vocals vox voice acapella acappella chant choir adlib adlibs"], ["bass", "bass 808 808s sub reese"], ["stab", "stab stabs chord chords hit hits"], ["pad", "pad pads atmosphere atmos drone ambience"], ["lead", "lead leads pluck plucks arp arps"],
+  ["fx", "fx sfx riser risers impact impacts sweep sweeps downlifter uplifter noise whoosh transition transitions foley"], ["synth", "synth synths keys piano organ rhodes strings guitar"]];
+function guessType(name, folder) {
+  var nw = cwords(name), fw = cwords(folder || ""), loop = hasW(nw, ["loop", "loops"]) || hasW(fw, ["loop", "loops"]), drum = hasW(nw, ["drum", "drums", "break", "breaks", "breakbeat"]) || hasW(fw, ["drum", "drums", "break", "breaks", "breakbeat"]);
+  for (var p = 0; p < 2; p++) { var w = p ? fw : nw; for (var i = 0; i < TYPE_RULES.length; i++) if (hasW(w, TYPE_RULES[i][1].split(" "))) { var t = TYPE_RULES[i][0]; if (loop && /^(kick|snare|hat|perc|clap)$/.test(t)) return "drum loop"; return t; } }
+  return loop ? (drum ? "drum loop" : "loop") : "";
+}
+var GENRE_RULES = [["drum and bass", "dnb drumnbass jungle neurofunk"], ["dubstep", "dubstep riddim brostep"], ["trap", "trap drill phonk"], ["hip hop", "hiphop boombap lofi"], ["techno", "techno hardtechno"], ["house", "house deephouse disco"], ["trance", "trance psytrance"], ["ambient", "ambient cinematic soundscape"],
+  ["edm", "edm bigroom futurebass"], ["pop", "pop kpop"], ["rock", "rock metal punk"], ["r&b", "rnb soul funk"], ["reggaeton", "reggaeton dancehall afrobeat"], ["synthwave", "synthwave retrowave vaporwave"], ["hardstyle", "hardstyle hardcore gabber"]];
+function guessGenre(name, folder) {
+  var ws = [cwords(name), cwords(folder || "")];
+  for (var k = 0; k < 2; k++) { var w = ws[k]; for (var i = 0; i < GENRE_RULES.length; i++) if (hasW(w, GENRE_RULES[i][1].split(" "))) return GENRE_RULES[i][0];
+    for (var j = 0; j + 1 < w.length; j++) { var a = w[j], b = w[j + 1]; if (a === "drum" && (b === "bass" || b === "and")) return "drum and bass"; if (a === "dn" && b === "b") return "drum and bass"; if (a === "hip" && b === "hop") return "hip hop"; if ((a === "deep" || a === "tech") && b === "house") return "house"; } }
+  return "";
+}
+var STEM_K = { drums: "drums", drum: "drums", bass: "bass", vocals: "vocals", vocal: "vocals", vox: "vocals", other: "other", piano: "piano", guitar: "guitar", synth: "synth", perc: "perc", percussion: "perc", fx: "fx", instrumental: "instrumental", inst: "instrumental", melody: "melody" };
+function stemsOf(d) {
+  var base = d.name.toLowerCase(), pre = d.folder ? d.folder.toLowerCase() + "/" : "", out = [];
+  LIB.forEach(function (o) { if (o === d) return; var on = o.name.toLowerCase(), of = o.folder.toLowerCase(), kind = "", ws, i;
+    if (o.folder === d.folder && on.length > base.length && on.indexOf(base) === 0) { ws = cwords(on.slice(base.length)); for (i = 0; i < ws.length; i++) if (STEM_K[ws[i]]) { kind = STEM_K[ws[i]]; break; } }
+    else if (of === pre + base + " stems" || of === pre + base + "_stems" || of === pre + base + " stem") { ws = cwords(on); for (i = 0; i < ws.length; i++) if (STEM_K[ws[i]]) { kind = STEM_K[ws[i]]; break; } }
+    if (kind) out.push({ kind: kind, d: o }); });
+  out.sort(function (a, b) { return a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0; }); return out;
+}
+/* ---- audio analysis: tempo from spectral flux, key from a chroma profile, type from spectrum and envelope (same rules as the C++ core) ---- */
+function catBpm(x) {
+  var N = 1024, hop = Math.max(1, Math.floor(sr * 0.01)), dt = hop / sr, len = Math.min(x.length, Math.floor(sr * 40)); if (len < N + hop * 16) return { bpm: 0, on: 0 };
+  var w = hann(N), prev = null, fl = [], p, b, f, m, i;
+  for (p = 0; p + N <= len; p += hop) { m = magSpec(x, p, N, w); for (i = 0; i < m.length; i++) m[i] = Math.log(1 + m[i] * 1000); f = 0; if (prev) for (b = 1; b < m.length / 2; b++) f += Math.max(0, m[b] - prev[b]); fl.push(f); prev = m; }
+  var mean = 0, mx = 0, sd = 0; fl.forEach(function (v) { mean += v; if (v > mx) mx = v; }); mean /= fl.length; fl.forEach(function (v) { sd += (v - mean) * (v - mean); }); sd = Math.sqrt(sd / fl.length);
+  var thr = Math.max(20, mean + 2.5 * sd, 0.25 * mx), n = 0, last = -100; for (i = 1; i + 1 < fl.length; i++) if (fl[i] > thr && fl[i] >= fl[i - 1] && fl[i] >= fl[i + 1] && i - last > Math.max(1, 0.08 / dt)) { n++; last = i; }
+  if (n < 4) return { bpm: 0, on: n }; for (i = 0; i < fl.length; i++) fl[i] = Math.max(0, fl[i] - mean);
+  var best = 0, bs = 0, tot = 0, cnt = 0; for (var bpm = 70; bpm <= 180; bpm += 0.25) { var lag = 60 / bpm / dt, s = 0, c = 0; for (var k = 0; k + Math.ceil(lag) + 1 < fl.length; k++) { var pos = k + lag, j = Math.floor(pos), fr = pos - j; s += fl[k] * (fl[j] * (1 - fr) + fl[j + 1] * fr); c++; } if (c < 4) continue; s /= c; tot += s; cnt++; if (s > bs) { bs = s; best = bpm; } }
+  if (!cnt || bs <= 1.6 * tot / cnt) return { bpm: 0, on: n }; return { bpm: Math.round(best * 2) / 2, on: n };
+}
+function catKey(x) {
+  var KM = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], Kn = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17], N = 8192; if (x.length < N / 2) return "";
+  var w = hann(N), bh = sr / N, lo = Math.floor(60 / bh), hi = Math.floor(Math.min(2500, sr / 2 - 100) / bh), ch = new Float64Array(12), hop = Math.max(4096, Math.floor(x.length / 40)), p, b, m;
+  for (p = 0; p === 0 || p + N <= x.length; p += hop) { m = magSpec(x, p, N, w); var mx = 0; for (b = lo; b < hi && b < m.length; b++) mx = Math.max(mx, m[b]); if (mx <= 0) continue;
+    for (b = lo + 1; b + 1 < hi && b + 1 < m.length; b++) if (m[b] > m[b - 1] && m[b] >= m[b + 1] && m[b] > 0.1 * mx) { var den = m[b - 1] - 2 * m[b] + m[b + 1], dd = 0.5 * (m[b - 1] - m[b + 1]) / (den !== 0 ? den : 1), f = (b + dd) * bh, mi = Math.round(69 + 12 * Math.log2(f / 440)); ch[((mi % 12) + 12) % 12] += m[b] * m[b]; } }
+  var tot = 0; for (b = 0; b < 12; b++) tot += ch[b]; if (tot <= 0) return "";
+  function cor(a, c) { var ma = 0, mc = 0, j; for (j = 0; j < 12; j++) { ma += a[j]; mc += c[j]; } ma /= 12; mc /= 12; var s1 = 0, sa = 0, sb = 0; for (j = 0; j < 12; j++) { s1 += (a[j] - ma) * (c[j] - mc); sa += (a[j] - ma) * (a[j] - ma); sb += (c[j] - mc) * (c[j] - mc); } return sa > 0 && sb > 0 ? s1 / Math.sqrt(sa * sb) : 0; }
+  var best = -2, name = ""; for (var r = 0; r < 12; r++) { var pa = [], pn = [], i; for (i = 0; i < 12; i++) { pa.push(KM[(i - r + 12) % 12]); pn.push(Kn[(i - r + 12) % 12]); } var c1 = cor(ch, pa), c2 = cor(ch, pn); if (c1 > best) { best = c1; name = NOTE_NAMES[r]; } if (c2 > best) { best = c2; name = NOTE_NAMES[r] + "m"; } }
+  return best > 0.55 ? name : "";
+}
+function catAnalyse(x) {
+  var r = { ok: false, duration: x.length / sr, bpm: 0, key: "", type: "" }; if (x.length < 256) return r; r.ok = true; var peak = 0, i; for (i = 0; i < x.length; i++) peak = Math.max(peak, Math.abs(x[i])); if (peak < 1e-4) { r.type = "other"; return r; }
+  var win = Math.floor(sr * 0.005), e = [], j, m0; for (i = 0; i + win <= x.length; i += win) { m0 = 0; for (j = 0; j < win; j++) m0 = Math.max(m0, Math.abs(x[i + j])); e.push(m0); }
+  var pi = 0; for (i = 0; i < e.length; i++) if (e[i] > e[pi]) pi = i; var di = pi; while (di < e.length && e[di] > e[pi] * 0.0316) di++; var decay = (di - pi) * win / sr;
+  var N = 4096, from = pi * win > N / 2 ? pi * win - N / 4 : 0, w = hann(N), bh = sr / N, lo = 0, hi = 0, all = 0, cn = 0, lg = 0, nb = 0, am = 0, ac = 0, p, b, m, f, pw;
+  for (p = from; p < x.length && p < from + sr * 0.4; p += N / 2) { m = magSpec(x, p, N, w); for (b = 1; b < m.length; b++) { f = b * bh; pw = m[b] * m[b]; all += pw; cn += pw * f; if (f < 150) lo += pw; if (f > 6000) hi += pw; if (f > 60 && f < 12000) { lg += Math.log(pw + 1e-12); nb++; am += pw; ac++; } } }
+  var centroid = all > 0 ? cn / all : 0, lowS = all > 0 ? lo / all : 0, highS = all > 0 ? hi / all : 0, flat = 0; if (ac && nb) { var geo = Math.exp(lg / nb), ar = am / ac; flat = ar > 0 ? Math.min(1, geo / ar) : 0; }
+  m = magSpec(x, from, N, w); var bb = 0, bv = 0, tt = 0; for (b = Math.floor(30 / bh); b < m.length && b * bh < 2000; b++) { tt += m[b]; if (m[b] > bv) { bv = m[b]; bb = b; } } var f0 = bb * bh, tonal = tt > 0 && bv / tt > 0.08;
+  var t = catBpm(x); r.bpm = t.bpm; r.onsets = t.on; var loop = r.duration >= 1.6 && t.on >= 4; if ((tonal || loop) && !(loop && lowS > 0.6)) r.key = catKey(x);
+  var ty;
+  if (loop) ty = (lowS + highS > 0.5 && flat > 0.02 && !tonal) ? "drum loop" : "loop";
+  else if (r.duration < 1.6) {
+    if (lowS > 0.55 && centroid < 700 && decay < 1.5) ty = (f0 < 90 && decay > 0.5 && tonal) ? "bass" : "kick";
+    else if (highS > 0.35 && centroid > 4500 && decay < 0.8) ty = "hat";
+    else if (tonal && decay < 0.35 && centroid > 300) ty = "stab";
+    else if (!tonal && centroid > 1200 && centroid < 6000 && decay < 0.6) ty = flat > 0.15 ? "snare" : "perc";
+    else if (tonal && f0 < 140) ty = "bass"; else if (tonal) ty = "synth"; else ty = decay < 0.5 ? "perc" : "fx";
+  } else { if (tonal && f0 < 140 && centroid < 900) ty = "bass"; else if (tonal) ty = decay > 2.5 ? "pad" : "synth"; else ty = "fx"; }
+  r.type = ty; r.centroid = centroid; r.f0 = f0; return r;
+}
+function applyAn(d, a) { if (!a.ok) return; d.lastAn = a.type; d.dur = a.duration; d.analysed = true; if (a.bpm > 0 && !d.bpm) d.bpm = a.bpm; if (a.key && !d.key) d.key = a.key; if (d.typeSrc !== "name" && d.typeSrc !== "user" && a.type) { d.type = a.type; d.typeSrc = "audio"; } }
+var ANQ = [], anBusy = false, anTotal = 0, anDone = 0;
+function queueAn(d) { if (d.analysed || d.gen || !d.file || d.anQ) return; d.anQ = 1; ANQ.push(d); anTotal++; setTimeout(pumpAn, 30); }
+function pumpAn() {
+  if (anBusy) return; if (!ANQ.length) { anTotal = anDone = 0; updAn(); return; } anBusy = true; var d = ANQ.shift(); ensureCtx(); updAn();
+  var fin = function () { anDone++; anBusy = false; if (!ANQ.length || anDone % 8 === 0) { renderTbar(); renderTable(); } setTimeout(pumpAn, 5); };
+  if (d.file.size > 90e6) { d.analysed = true; d.anFail = "too large to analyse here"; return fin(); }
+  var fr = new FileReader(); fr.onload = function () { try { ctx.decodeAudioData(fr.result, function (b) { try { var n = Math.min(b.length, Math.floor(sr * 40)), mono = mixMono(b.getChannelData(0).slice(0, n), b.numberOfChannels > 1 ? b.getChannelData(1).slice(0, n) : null), a = catAnalyse(mono); a.duration = b.length / b.sampleRate; applyAn(d, a); } catch (e) { d.analysed = true; d.anFail = "analysis failed"; } fin(); }, function () { d.analysed = true; d.anFail = "this browser cannot decode this format"; fin(); }); } catch (e) { d.analysed = true; d.anFail = "this browser cannot decode this format"; fin(); } };
+  fr.onerror = function () { d.analysed = true; d.anFail = "could not read"; fin(); }; fr.readAsArrayBuffer(d.file);
+}
+function updAn() { var el = $("#anNote"); if (!el) return; var left = ANQ.length + (anBusy ? 1 : 0); el.textContent = left ? "Analysing " + (anDone + 1) + " of " + anTotal + " (BPM, key, type)..." : ""; }
+/* ---- import: folders (every subfolder), loose files, drag and drop, Splice watch folder ---- */
+function metaKey(d) { return d.rel || d.name; }
+function importItems(items, mode) {
+  var have = {}, added = 0, skipped = 0, banks = {}, depth = 0, fresh = []; LIB.forEach(function (d) { have[d.rel || ("::" + d.name)] = 1; });
+  items.forEach(function (it) { var f = it.file, rel = it.rel; if (!AUDIO_RE.test(f.name) || /^\._/.test(f.name)) { skipped++; return; } if (have[rel]) return; have[rel] = 1;
+    var parts = rel.split("/"); parts.pop(); var bank = parts[0] || "Loose files"; depth = Math.max(depth, parts.length - 1); banks[bank] = 1;
+    var d = { id: LIB.length, name: f.name.replace(/\.[^.]+$/, ""), rel: rel, folder: parts.join("/") || "Loose files", bank: bank, tags: [], kind: "oneshot", gen: null, file: f, bpm: 0, key: "", fav: false, rating: 0, buf: null, type: "", typeSrc: "", genre: "", analysed: false };
+    d.bpm = guessBpmJs(d.name) || guessBpmJs(d.folder) || 0; d.key = guessKeyJs(d.name); d.type = guessType(d.name, d.folder); if (d.type) d.typeSrc = "name"; d.genre = guessGenre(d.name, d.folder);
+    parts.forEach(function (p) { p = p.toLowerCase().replace(/[^a-z0-9 \-]/g, ""); if (p && d.tags.indexOf(p) < 0) d.tags.push(p); });
+    var m = META[metaKey(d)]; if (m) { if (m.tags) d.tags = m.tags; d.fav = !!m.fav; d.rating = m.rating | 0; if (m.type) { d.type = m.type; d.typeSrc = "user"; } }
+    LIB.push(d); fresh.push(d); added++; });
+  fresh.forEach(queueAn);
+  var nb = Object.keys(banks).length, msg = added ? "Added " + added + " sample" + (added === 1 ? "" : "s") + " from " + nb + " folder" + (nb === 1 ? "" : "s") + (depth > 0 ? ", subfolders down to level " + depth + " included" : "") + "." : (items.length ? "Nothing new: those files are already in the library." : "No files found.");
+  if (skipped) msg += " " + skipped + " non-audio file" + (skipped === 1 ? "" : "s") + " skipped.";
+  IMPMSG = msg; var el = $("#impMsg"); if (el) el.textContent = msg; renderTree(); renderChips(); renderTbar(); renderTable(); renderSplice(); return added;
+}
+var IMPMSG = "";
+function guessBpmJs(name) { var s = name.toLowerCase(), m = s.match(/(?:^|[^0-9])(\d{2,3})[ _\-]?bpm/) || s.match(/bpm[ _\-]?(\d{2,3})(?!\d)/); if (m) { var v = +m[1]; if (v >= 60 && v <= 200) return v; } return 0; }
+function guessKeyJs(name) { var tok = name.split(/[_\-\s.()]+/), kw = /key/i.test(name), i; for (i = 0; i < tok.length; i++) { var t = tok[i]; if (!t || t[0] < "A" || t[0] > "G") continue; var note = t[0], p = 1; if (t[p] === "#") { note += "#"; p++; } else if (t[p] === "b") { note += "b"; p++; } var rest = t.slice(p); if (rest === "m" || rest === "min" || rest === "minor") return note + "m"; if (rest === "maj" || rest === "major") return note; if (rest === "" && (note.length === 2 || kw)) return note; } return ""; }
+function entryFile(en) { return new Promise(function (ok, no) { en.file(ok, no); }); }
+function readAll(dr) { return new Promise(function (ok) { var all = []; (function go() { dr.readEntries(function (b) { if (b.length) { all = all.concat(Array.prototype.slice.call(b)); go(); } else ok(all); }, function () { ok(all); }); })(); }); }
+async function walkEntry(en, path, out) {
+  if (en.isFile) { out.push({ file: await entryFile(en), rel: path + en.name }); } else if (en.isDirectory) { var kids = await readAll(en.createReader()); for (var i = 0; i < kids.length; i++) await walkEntry(kids[i], path + en.name + "/", out); }
+}
+async function walkHandle(h, path, out) {
+  for await (var pair of h.entries()) { var name = pair[0], c = pair[1]; if (c.kind === "directory") await walkHandle(c, path + name + "/", out); else if (AUDIO_RE.test(name) && !/^\._/.test(name)) out.push({ file: await c.getFile(), rel: path + name }); }
+}
+
 /* ===== CATalog mockup: sample library with folders, tags, search, preview, drag out ===== */
 ensureCtx();
-def("view", "lib"); def("fol", ""); def("tags", "[]"); def("q", ""); def("sort", "name"); def("favOnly", false); def("pAuto", true); def("loopP", false); def("ptch", 0); def("sync", false); def("vol", 0); def("hostBpm", 128); def("sel", -1);
+def("view", "lib"); def("ftype", ""); def("fgenre", ""); def("fkey", ""); def("fol", ""); def("tags", "[]"); def("q", ""); def("sort", "name"); def("favOnly", false); def("pAuto", true); def("loopP", false); def("ptch", 0); def("sync", false); def("vol", 0); def("hostBpm", 128); def("sel", -1);
 var LIB = buildLibrary(), META = {}, pm = new Peak2(), pv = { src: null, t0: 0, rate: 1, dur: 0, on: false, buf: null, d: null }, AGc = null, ROWS = [];
 try { META = JSON.parse(localStorage.getItem("catalog.meta.v1") || "{}"); } catch (e) { META = {}; }
 function saveMeta() { try { localStorage.setItem("catalog.meta.v1", JSON.stringify(META)); } catch (e) { } }
 LIB.forEach(function (d) { var m = META[d.name]; if (m) { if (m.tags) d.tags = m.tags; d.fav = !!m.fav; d.rating = m.rating | 0; } });
-function persist(d) { META[d.name] = { tags: d.tags, fav: d.fav, rating: d.rating }; saveMeta(); }
-function lenOf(d) { var b = d.buf || (d.gen ? sampleBuf(d) : null); return b ? b.length / sr : 0; }
+function persist(d) { META[metaKey(d)] = { tags: d.tags, fav: d.fav, rating: d.rating, type: d.typeSrc === "user" ? d.type : "" }; saveMeta(); }
+function lenOf(d) { if (d.dur) return d.dur; var b = d.buf || (d.gen ? sampleBuf(d) : null); return b ? b.length / sr : 0; }
 /* analyze tonal key for generated loops when the library lists none */
 /* ---------- filters and table ---------- */
 function tagSet() { try { return JSON.parse(S.tags); } catch (e) { return []; } }
 function listVisible() {
   var q = S.q.trim().toLowerCase(), ts = tagSet(), out = LIB.filter(function (d) {
+    if (S.ftype && (S.ftype === "unknown" ? d.type : d.type !== S.ftype)) return false; if (S.fgenre && d.genre !== S.fgenre) return false; if (S.fkey && d.key !== S.fkey) return false;
     if (S.fol && !(d.folder === S.fol || d.folder.indexOf(S.fol + "/") === 0)) return false; if (S.favOnly && !d.fav) return false;
     if (ts.length && !ts.every(function (t) { return d.tags.indexOf(t) >= 0; })) return false;
-    if (q) { var hay = (d.name + " " + d.tags.join(" ") + " " + d.key + " " + (d.bpm || "") + " " + d.folder).toLowerCase(); return q.split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; }); } return true; });
+    if (q) { var hay = (d.name + " " + d.tags.join(" ") + " " + d.key + " " + (d.bpm || "") + " " + d.folder + " " + d.type + " " + d.genre).toLowerCase(); return q.split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; }); } return true; });
   out.sort(function (a, b) { if (S.sort === "bpm") return (b.bpm || 0) - (a.bpm || 0); if (S.sort === "key") return a.key.localeCompare(b.key); if (S.sort === "len") return lenOf(b) - lenOf(a); if (S.sort === "rate") return b.rating - a.rating; return a.name.localeCompare(b.name, undefined, { numeric: true }); });
   return out;
+}
+function esc(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function renderTbar() {
+  var C = {}, G = {}, K = {}; LIB.forEach(function (d) { var t = d.type || "unknown"; C[t] = (C[t] || 0) + 1; if (d.genre) G[d.genre] = (G[d.genre] || 0) + 1; if (d.key) K[d.key] = (K[d.key] || 0) + 1; });
+  var h = '<span class="lab">Type</span><span class="chip' + (!S.ftype ? " on" : "") + '" data-ty="">all<i>' + LIB.length + "</i></span>";
+  TYPES.concat(["unknown"]).forEach(function (t) { if (C[t] || S.ftype === t) h += '<span class="chip' + (S.ftype === t ? " on" : "") + '" data-ty="' + t + '">' + (t === "unknown" ? "?" : t) + "<i>" + (C[t] || 0) + "</i></span>"; });
+  $("#tbar").innerHTML = h; $$("#tbar .chip").forEach(function (c) { c.addEventListener("click", function () { var t = c.getAttribute("data-ty"); setParam("ftype", S.ftype === t ? "" : t, true); }); });
+  var gs = $("#gsel"), ks = $("#ksel"); gs.innerHTML = '<option value="">All</option>' + Object.keys(G).sort().map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + " (" + G[g] + ")</option>"; }).join(""); gs.value = S.fgenre;
+  ks.innerHTML = '<option value="">All</option>' + Object.keys(K).sort().map(function (k) { return '<option value="' + esc(k) + '">' + esc(k) + " (" + K[k] + ")</option>"; }).join(""); ks.value = S.fkey;
 }
 function renderTree() {
   var T = {}; LIB.forEach(function (d) { var p = d.folder.split("/"), acc = ""; p.forEach(function (x) { acc = acc ? acc + "/" + x : x; T[acc] = (T[acc] || 0) + 1; }); });
   var keys = Object.keys(T).sort(), h = '<div class="tn' + (S.fol === "" ? " on" : "") + '" data-f=""><span>All samples</span><small>' + LIB.length + "</small></div>";
-  keys.forEach(function (k) { var dep = k.split("/").length - 1; h += '<div class="tn' + (S.fol === k ? " on" : "") + '" data-f="' + k + '" style="padding-left:' + (6 + dep * 12) + 'px"><span>' + k.split("/").pop() + "</span><small>" + T[k] + "</small></div>"; });
+  keys.forEach(function (k) { var dep = k.split("/").length - 1; if (dep > 3 && k.split("/").length > 4 && S.fol.indexOf(k.split("/").slice(0, 4).join("/")) !== 0 && false) return; h += '<div class="tn' + (S.fol === k ? " on" : "") + '" data-f="' + k + '" style="padding-left:' + (6 + dep * 12) + 'px"><span>' + k.split("/").pop() + "</span><small>" + T[k] + "</small></div>"; });
   $("#tree").innerHTML = h; $$("#tree .tn").forEach(function (n) { n.addEventListener("click", function () { setParam("fol", n.getAttribute("data-f"), true); }); });
 }
 function renderChips() {
@@ -976,8 +1122,8 @@ function renderChips() {
   $$("#chips .chip").forEach(function (c) { c.addEventListener("click", function () { var t = c.getAttribute("data-t"), a = tagSet(), i = a.indexOf(t); if (i >= 0) a.splice(i, 1); else a.push(t); setParam("tags", JSON.stringify(a), true); }); });
 }
 function renderTable() {
-  ROWS = listVisible(); var h = '<div class="tr hd"><span></span><span>Name</span><span>BPM</span><span>Key</span><span>Length</span><span>Tags</span><span>Rating</span></div>';
-  ROWS.forEach(function (d, i) { h += '<div class="tr' + (d.id === S.sel ? " sel" : "") + '" data-i="' + i + '"><span class="st" data-s="' + i + '">' + (d.fav ? "&#9733;" : "&#9734;") + "</span><span>" + d.name + '</span><span class="mn">' + (d.bpm || "") + '</span><span class="mn">' + d.key + '</span><span class="mn">' + (d.buf || d.gen ? fmtT(lenOf(d)) : "") + '</span><span class="tg">' + d.tags.join(", ") + '</span><span class="mn">' + "&#9733;".repeat(d.rating) + "</span></div>"; });
+  ROWS = listVisible(); var h = '<div class="tr hd"><span></span><span>Name</span><span>Type</span><span>Genre</span><span>BPM</span><span>Key</span><span>Length</span><span>Tags</span><span>Rating</span></div>';
+  ROWS.forEach(function (d, i) { h += '<div class="tr' + (d.id === S.sel ? " sel" : "") + '" data-i="' + i + '"><span class="st" data-s="' + i + '">' + (d.fav ? "&#9733;" : "&#9734;") + "</span><span>" + esc(d.name) + '</span><span class="ty' + (d.type ? (d.typeSrc === "audio" ? " au" : "") : " q") + '" title="' + (d.typeSrc === "audio" ? "type guessed from the sound" : d.typeSrc === "user" ? "type set by you" : d.typeSrc ? "type from the file or folder name" : d.analysed ? "type unknown" : "waiting for analysis") + '">' + (d.type || (d.analysed ? "?" : "...")) + '</span><span class="gn">' + esc(d.genre) + '</span><span class="mn">' + (d.bpm || "") + '</span><span class="mn">' + d.key + '</span><span class="mn">' + (d.buf || d.gen ? fmtT(lenOf(d)) : "") + '</span><span class="tg">' + esc(d.tags.join(", ")) + '</span><span class="mn">' + "&#9733;".repeat(d.rating) + "</span></div>"; });
   if (!ROWS.length) h += '<div class="tr hd" style="cursor:default">No samples match. Clear the search or the tag filter.</div>';
   $("#tbl").innerHTML = h; $("#count").textContent = ROWS.length + " of " + LIB.length + " samples";
   $$("#tbl .tr[data-i]").forEach(function (r) { r.addEventListener("click", function (e) { var i = +r.getAttribute("data-i"); if (e.target.getAttribute("data-s") !== null) { ROWS[i].fav = !ROWS[i].fav; persist(ROWS[i]); renderTable(); showPrev(); return; } select(ROWS[i].id, true); }); r.addEventListener("dblclick", function () { startP(true); }); });
@@ -985,18 +1131,21 @@ function renderTable() {
 function byId(id) { return LIB.filter(function (d) { return d.id === id; })[0]; }
 /* ---------- preview ---------- */
 function ensureAG() { if (AGc) return AGc; var g = {}; g.gain = ctx.createGain(); g.an = mkAn(2048, 0.7); g.out = mkAn(1024, 0.3); g.gain.connect(g.an); g.an.connect(g.out); g.out.connect(ctx.destination); AGc = g; return g; }
-function select(id, auto) { setParam("sel", id, true); renderTable(); showPrev(); if (auto && S.pAuto) startP(true); var r = $("#tbl .tr.sel"); if (r) r.scrollIntoView({ block: "nearest" }); }
+function select(id, auto) { setParam("sel", id, true); renderTable(); showPrev(); if (S.view === "stems") renderStems(); if (auto && S.pAuto) startP(true); var r = $("#tbl .tr.sel"); if (r) r.scrollIntoView({ block: "nearest" }); }
 function showPrev() {
-  var d = byId(S.sel); if (!d) { $("#pvName").textContent = "Nothing selected"; $("#pvInfo").textContent = ""; $("#pvTags").innerHTML = ""; $("#rate").innerHTML = ""; return; }
+  var d = byId(S.sel); if (!d) { $("#pvName").textContent = "Nothing selected"; $("#pvInfo").textContent = ""; $("#pvTags").innerHTML = ""; $("#pvType").innerHTML = ""; $("#rate").innerHTML = ""; return; }
   $("#pvName").textContent = d.name; $("#pvInfo").textContent = fmtT(lenOf(d)) + (d.bpm ? "  ·  " + d.bpm + " BPM" : "") + (d.key ? "  ·  " + d.key : "");
   $("#pvTags").innerHTML = d.tags.map(function (t, i) { return '<span class="chip on" data-r="' + i + '" data-tip="Click to remove this tag.">' + t + " &times;</span>"; }).join("") + '<input id="tagIn" placeholder="+ tag" maxlength="20" style="width:80px;background:#0a0b0e;color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:2px 8px;font-size:12px">';
   $$("#pvTags .chip").forEach(function (c) { c.addEventListener("click", function () { d.tags.splice(+c.getAttribute("data-r"), 1); persist(d); renderChips(); renderTable(); showPrev(); }); });
   $("#tagIn").addEventListener("keydown", function (e) { if (e.key === "Enter") { var v = this.value.trim().toLowerCase().replace(/[^a-z0-9 \-]/g, ""); if (v && d.tags.indexOf(v) < 0) { d.tags.push(v); persist(d); renderChips(); renderTable(); showPrev(); $("#tagIn").focus(); } } });
   $("#rate").innerHTML = [1, 2, 3, 4, 5].map(function (n) { return '<span data-n="' + n + '" class="' + (n <= d.rating ? "on" : "") + '">&#9733;</span>'; }).join(""); $$("#rate span").forEach(function (s) { s.addEventListener("click", function () { var n = +s.getAttribute("data-n"); d.rating = d.rating === n ? 0 : n; persist(d); renderTable(); showPrev(); }); });
+  var tsel = '<label class="fld"><span>Type</span><select id="typeSel" class="mini"><option value="">' + (d.typeSrc === "user" ? "(auto)" : d.type ? d.type + " (auto)" : "unknown (auto)") + "</option>" + TYPES.map(function (t) { return '<option value="' + t + '"' + (d.typeSrc === "user" && d.type === t ? " selected" : "") + ">" + t + "</option>"; }).join("") + "</select></label>";
+  $("#pvType").innerHTML = tsel + '<span class="note">' + (d.typeSrc === "audio" ? "guessed from the sound" : d.typeSrc === "name" ? "from the file or folder name" : d.typeSrc === "user" ? "set by you" : d.analysed ? "no guess" : "analysing...") + (d.genre ? " · genre " + esc(d.genre) + " (from the name)" : "") + (d.anFail ? " · " + d.anFail : "") + "</span>";
+  $("#typeSel").addEventListener("change", function () { if (this.value) { d.type = this.value; d.typeSrc = "user"; } else { d.type = ""; d.typeSrc = ""; var g = guessType(d.name, d.folder); if (g) { d.type = g; d.typeSrc = "name"; } else if (d.lastAn) { d.type = d.lastAn; d.typeSrc = "audio"; } } persist(d); renderTbar(); renderTable(); showPrev(); });
   $("#bFavOne").innerHTML = d.fav ? "&#9733; Favourite" : "&#9734; Favourite"; $("#bFavOne").setAttribute("aria-pressed", String(d.fav));
 }
-function startP(restart) {
-  var d = byId(S.sel); if (!d) return; ensureCtx(); var g = ensureAG(); stopP();
+function startP(restart, dd) {
+  var d = dd || byId(S.sel); if (!d) return; ensureCtx(); var g = ensureAG(); stopP();
   ensureBuf(d, function () {
     var x = d.buf, b = ctx.createBuffer(1, x.length, sr); b.getChannelData(0).set(x); var s = ctx.createBufferSource(); s.buffer = b; s.loop = S.loopP;
     var rate = Math.pow(2, S.ptch / 12) * (S.sync && d.bpm ? S.hostBpm / d.bpm : 1); s.playbackRate.value = rate; g.gain.gain.value = Math.pow(10, S.vol / 20); s.connect(g.gain); s.start(); s.onended = function () { if (pv.src === s) { pv.on = false; refreshP(); } };
@@ -1007,7 +1156,7 @@ function stopP() { if (pv.src) { try { pv.src.onended = null; pv.src.stop(); } c
 function refreshP() { $("#bPlay").innerHTML = pv.on ? "&#9632; Stop" : "&#9654; Play"; $("#bPlay").setAttribute("aria-pressed", String(pv.on)); }
 function ensureBuf(d, cb) {
   if (d.buf) return cb(); if (d.gen) { sampleBuf(d); return cb(); }
-  var fr = new FileReader(); fr.onload = function () { ctx.decodeAudioData(fr.result, function (b) { var n = Math.min(b.length, sr * 60); d.buf = mixMono(b.getChannelData(0).slice(0, n), b.numberOfChannels > 1 ? b.getChannelData(1).slice(0, n) : null); if (d.buf.length > sr * 2.5) { d.kind = "loop"; var a = analyzeTrack(d.buf); d.bpm = a.bpm; d.key = a.key; } renderTable(); showPrev(); cb(); }, function () { }); }; fr.readAsArrayBuffer(d.file);
+  var fr = new FileReader(); fr.onload = function () { ctx.decodeAudioData(fr.result, function (b) { var n = Math.min(b.length, sr * 60); d.buf = mixMono(b.getChannelData(0).slice(0, n), b.numberOfChannels > 1 ? b.getChannelData(1).slice(0, n) : null); if (!d.analysed) { var a = catAnalyse(d.buf); a.duration = d.buf.length / sr; applyAn(d, a); } renderTable(); showPrev(); cb(); }, function () { }); }; fr.readAsArrayBuffer(d.file);
 }
 function playPos() { if (!pv.on || !pv.buf) return -1; var el = (ctx.currentTime - pv.t0) * pv.rate; var t = S.loopP ? el % pv.dur : el; return clamp(t / pv.dur, 0, 1); }
 /* ---------- displays ---------- */
@@ -1039,14 +1188,66 @@ $("#bFavOne").addEventListener("click", function () { var d = byId(S.sel); if (!
 $("#tagClear").addEventListener("click", function () { setParam("tags", "[]", true); });
 $("#bSend").addEventListener("click", function () { openCard('<h2>Send to SupurrSaw</h2><p>In the plugin this adds the sample to the SupurrSaw wavetable and oscillator library. The mockup has no plugin to send it to.</p><div class="row"><button data-close class="on">OK</button></div>'); });
 $("#bAddFolder").addEventListener("click", function () { $("#dirIn").click(); });
-$("#dirIn").addEventListener("change", function (e) { var fs = Array.prototype.filter.call(e.target.files, function (f) { return /\.(wav|mp3|flac|ogg|aif|aiff|m4a)$/i.test(f.name); }); fs.slice(0, 400).forEach(function (f) { var rel = (f.webkitRelativePath || f.name).split("/"); rel.pop(); LIB.push({ id: LIB.length, name: f.name.replace(/\.[^.]+$/, ""), folder: "Your folder" + (rel.length ? "/" + rel.join("/") : ""), tags: [], kind: "oneshot", gen: null, file: f, bpm: 0, key: "", fav: false, rating: 0, buf: null }); }); renderTree(); renderChips(); renderTable(); $("#count").textContent += fs.length ? "  (added " + fs.length + " files)" : ""; });
+$("#bAddFiles").addEventListener("click", function () { $("#fileIn").click(); });
+function fromInput(inp, loose) { return Array.prototype.map.call(inp.files, function (f) { return { file: f, rel: loose ? "Loose files/" + f.name : (f.webkitRelativePath || ("Loose files/" + f.name)) }; }); }
+$("#dirIn").addEventListener("change", function (e) { importItems(fromInput(e.target, false)); e.target.value = ""; });
+$("#fileIn").addEventListener("change", function (e) { importItems(fromInput(e.target, true)); e.target.value = ""; });
+/* drag a folder (or files) onto the window */
+var dropOv = document.createElement("div"); dropOv.className = "dropov"; dropOv.textContent = "Drop folders or files to import"; document.body.appendChild(dropOv); var dragN = 0;
+function hasFiles(e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], "Files") >= 0; }
+window.addEventListener("dragenter", function (e) { if (!hasFiles(e)) return; dragN++; dropOv.classList.add("on"); });
+window.addEventListener("dragleave", function (e) { if (!hasFiles(e)) return; dragN = Math.max(0, dragN - 1); if (!dragN) dropOv.classList.remove("on"); });
+window.addEventListener("dragover", function (e) { if (hasFiles(e)) e.preventDefault(); });
+window.addEventListener("drop", async function (e) {
+  if (!hasFiles(e)) return; e.preventDefault(); dragN = 0; dropOv.classList.remove("on"); var items = Array.prototype.slice.call(e.dataTransfer.items || []), out = [], files = Array.prototype.slice.call(e.dataTransfer.files || []);
+  var ens = items.map(function (it) { return it.webkitGetAsEntry ? it.webkitGetAsEntry() : null; });
+  if (ens.length && ens.every(Boolean)) { for (var i = 0; i < ens.length; i++) await walkEntry(ens[i], ens[i].isFile ? "Loose files/" : "", out); } else out = files.map(function (f) { return { file: f, rel: "Loose files/" + f.name }; });
+  importItems(out);
+});
+/* ---------- Splice tab: save folder + watch, no login ---------- */
+var SP = { handle: null, name: "", watching: false, last: "", timer: null, files: 0 };
+try { var sp0 = JSON.parse(localStorage.getItem("catalog.splice.v1") || "{}"); SP.name = sp0.name || ""; SP.watching = !!sp0.watching && false; } catch (e) { }
+function spSave() { try { localStorage.setItem("catalog.splice.v1", JSON.stringify({ name: SP.name, watching: SP.watching })); } catch (e) { } }
+function renderSplice() {
+  var n = SP.name ? LIB.filter(function (d) { return d.bank === SP.name; }) : [], can = !!window.showDirectoryPicker;
+  $("#spStatus").innerHTML = SP.name ? "Save folder: <b>" + esc(SP.name) + "</b> · " + n.length + " sample" + (n.length === 1 ? "" : "s") + " imported · Watching: <b>" + (SP.watching ? "on" : "off") + "</b>" : "No Splice save folder chosen yet.";
+  $("#bSpWatch").setAttribute("aria-pressed", String(SP.watching)); $("#bSpWatch").disabled = !SP.name || (!SP.handle); $("#bSpScan").disabled = !SP.name;
+  $("#spList").innerHTML = n.length ? n.slice(-30).reverse().map(function (d) { return "<div><span>" + esc(d.name) + "</span><small>" + esc(d.folder) + "</small></div>"; }).join("") : '<div><small>Nothing imported yet.</small></div>';
+  $("#spNote").textContent = can ? "This browser lets CATalog keep looking at the folder while this tab is open. The plugin and app watch it all the time and remember the folder." : "This browser cannot keep a folder open for watching. Use Check now and pick the folder again; the plugin and app do watch it all the time.";
+}
+async function spScan() {
+  if (!SP.handle) { $("#spIn").click(); return; }
+  try { var out = []; await walkHandle(SP.handle, SP.handle.name + "/", out); var sig = out.length + ":" + out.map(function (o) { return o.file.lastModified; }).reduce(function (a, b) { return Math.max(a, b); }, 0); if (sig !== SP.last) { SP.last = sig; var n = importItems(out); if (n) IMPMSG = "Splice folder: " + n + " new sample" + (n === 1 ? "" : "s") + "."; $("#impMsg").textContent = IMPMSG; } } catch (e) { $("#spStatus").textContent = "Cannot read that folder any more. Choose it again."; }
+  renderSplice();
+}
+function spTimer() { clearInterval(SP.timer); SP.timer = null; if (SP.watching && SP.handle) SP.timer = setInterval(spScan, 4000); }
+$("#bSpOpen").addEventListener("click", function () { window.open("https://splice.com", "_blank", "noopener"); });
+$("#bSpPick").addEventListener("click", async function () {
+  if (window.showDirectoryPicker) { try { var h = await window.showDirectoryPicker(); SP.handle = h; SP.name = h.name; SP.last = ""; SP.watching = true; spSave(); spTimer(); await spScan(); } catch (e) { } }
+  else $("#spIn").click();
+});
+$("#spIn").addEventListener("change", function (e) { var its = fromInput(e.target, false); if (its.length) { SP.name = its[0].rel.split("/")[0]; SP.handle = null; SP.watching = false; spSave(); } else if (e.target.files.length === 0) { return; } importItems(its); e.target.value = ""; renderSplice(); });
+$("#bSpWatch").addEventListener("click", function () { SP.watching = !SP.watching; spSave(); spTimer(); renderSplice(); if (SP.watching) spScan(); });
+$("#bSpScan").addEventListener("click", function () { spScan(); });
+/* ---------- Stems tab: stem files found next to the loop ---------- */
+function renderStems() {
+  var d = byId(S.sel), box = $("#stemMsg"); if (!d) { box.innerHTML = "<h3>Stems</h3><p>Select a loop in the Library to see its stem files.</p>"; return; }
+  var st = stemsOf(d), by = {}; st.forEach(function (x) { (by[x.kind] = by[x.kind] || []).push(x); });
+  var kinds = ["drums", "bass", "vocals", "other"]; Object.keys(by).forEach(function (k) { if (kinds.indexOf(k) < 0) kinds.push(k); });
+  var h = "<h3>Stems · " + esc(d.name) + "</h3>";
+  if (!st.length) h += "<p><b>No stem files found next to this sample.</b> CATalog looks in the same folder for files named like <i>" + esc(d.name) + "_drums</i>, <i>_bass</i>, <i>_vocals</i>, <i>_other</i> (also &ldquo; - drums&rdquo; or &ldquo;(drums)&rdquo;), or a folder called <i>" + esc(d.name) + " stems</i>. It does not split audio into stems itself: put the stem files beside the loop, or export them from your stem splitter, and import that folder.</p>";
+  else h += "<p>" + st.length + " stem file" + (st.length === 1 ? "" : "s") + " found beside this loop. Click one to listen.</p>";
+  h += '<div class="stems">' + kinds.map(function (k) { var f = by[k]; if (!f) return '<div class="no">' + k + "<small>missing</small></div>"; return f.map(function (x) { return '<div class="ok" data-sid="' + x.d.id + '">' + k + "<small>" + esc(x.d.name) + "</small></div>"; }).join(""); }).join("") + "</div>";
+  box.innerHTML = h; $$("#stemMsg .ok").forEach(function (c) { c.addEventListener("click", function () { var o = byId(+c.getAttribute("data-sid")); if (o) startP(true, o); }); });
+}
+$("#gsel").addEventListener("change", function () { setParam("fgenre", this.value, true); }); $("#ksel").addEventListener("change", function () { setParam("fkey", this.value, true); });
 attachTip($("#dragBox"), "Drag out", "Drag this to your DAW or desktop. In a browser it saves a WAV; in the plugin it drops the sample on a track.");
 $("#dragBox").addEventListener("dragstart", function (e) { var d = byId(S.sel); if (!d || !d.buf) { e.preventDefault(); return; } var ab = encodeWav([d.buf], sr), url = URL.createObjectURL(new Blob([ab], { type: "audio/wav" })); try { e.dataTransfer.setData("DownloadURL", "audio/wav:" + d.name + ".wav:" + url); e.dataTransfer.effectAllowed = "copy"; } catch (x) { } });
 $$("#tabs button").forEach(function (b) { b.addEventListener("click", function () { setParam("view", b.getAttribute("data-view"), true); }); });
 var VIEWS = ["lib", "stems", "web"];
-function setView() { $$("#tabs button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-view") === S.view)); }); $("#vLib").hidden = S.view !== "lib"; $("#vStems").hidden = S.view !== "stems"; $("#vWeb").hidden = S.view !== "web"; }
+function setView() { $$("#tabs button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-view") === S.view)); }); $("#vLib").hidden = S.view !== "lib"; $("#vStems").hidden = S.view !== "stems"; $("#vWeb").hidden = S.view !== "web"; if (S.view === "stems") renderStems(); if (S.view === "web") renderSplice(); }
 window.onParam = function (id, v) {
-  if (id === "view") setView(); else if (id === "fol" || id === "tags" || id === "q" || id === "sort" || id === "favOnly") { if (id === "fol") renderTree(); if (id === "tags") renderChips(); if (id === "q" && $("#q").value !== v) $("#q").value = v; if (id === "sort" && $("#sort").value !== v) $("#sort").value = v; renderTable(); }
+  if (id === "view") setView(); else if (id === "fol" || id === "tags" || id === "q" || id === "sort" || id === "favOnly" || id === "ftype" || id === "fgenre" || id === "fkey") { if (id === "fol") renderTree(); if (id === "ftype" || id === "fgenre" || id === "fkey") renderTbar(); if (id === "tags") renderChips(); if (id === "q" && $("#q").value !== v) $("#q").value = v; if (id === "sort" && $("#sort").value !== v) $("#sort").value = v; renderTable(); }
   if (id === "favOnly") $("#bFav").setAttribute("aria-pressed", String(!!v)); if (id === "loopP") { $("#bLoop").setAttribute("aria-pressed", String(!!v)); if (pv.src) pv.src.loop = !!v; } if (id === "pAuto") $("#bAuto").setAttribute("aria-pressed", String(!!v));
   if (id === "ptch" || id === "sync" || id === "hostBpm") { if (pv.src && pv.d) { var r = Math.pow(2, S.ptch / 12) * (S.sync && pv.d.bpm ? S.hostBpm / pv.d.bpm : 1); pv.t0 = ctx.currentTime - ((ctx.currentTime - pv.t0) * pv.rate) / r; pv.rate = r; pv.src.playbackRate.value = r; } }
   if (id === "vol" && AGc) AGc.gain.gain.value = Math.pow(10, v / 20);
@@ -1055,14 +1256,14 @@ document.addEventListener("keydown", function (e) { if (!modal.hidden || /INPUT|
 PAINT.push(function (dt) { var a = fit(cvW); if (a) drawWave(a); var s = fit(cvSp); if (s) drawSpec(s); var pk = 0; if (AGc) { var buf = new Float32Array(1024); AGc.out.getFloatTimeDomainData(buf); for (var i = 0; i < buf.length; i++) pk = Math.max(pk, Math.abs(buf[i])); } pm.upd(pk, pk, dt); var m = fit(cvM); if (m) drawMeterPair(m, pm.hl, pm.hr, pk, pk); });
 attachTip($("#cvSp").parentNode, "Spectrum", "Live spectrum of what is playing, 20 Hz to 20 kHz, in dB.");
 /* ---------- presets (saved views) ---------- */
-var KEYS = ["fol", "tags", "q", "sort", "favOnly", "loopP", "pAuto", "ptch", "sync", "vol"];
-var BASE = { fol: "", tags: "[]", q: "", sort: "name", favOnly: false, loopP: false, pAuto: true, ptch: 0, sync: false, vol: 0 };
+var KEYS = ["ftype", "fgenre", "fkey", "fol", "tags", "q", "sort", "favOnly", "loopP", "pAuto", "ptch", "sync", "vol"];
+var BASE = { ftype: "", fgenre: "", fkey: "", fol: "", tags: "[]", q: "", sort: "name", favOnly: false, loopP: false, pAuto: true, ptch: 0, sync: false, vol: 0 };
 function mx(v) { var o = {}; for (var k in BASE) o[k] = BASE[k]; for (k in v) o[k] = v[k]; return o; }
-var FACT = [{ name: "Everything", v: mx({}) }, { name: "Drums", v: mx({ fol: "Drums" }) }, { name: "Kicks, hard", v: mx({ fol: "Drums/Kicks", tags: '["hard"]' }) }, { name: "Loops, synced", v: mx({ fol: "Loops", loopP: true, sync: true }) }, { name: "Bass notes", v: mx({ fol: "Bass", sort: "key" }) }, { name: "Build and FX", v: mx({ fol: "FX" }) }, { name: "Favourites", v: mx({ favOnly: true }) }];
-initPresets(FACT, KEYS, function () { renderTree(); renderChips(); renderTable(); });
-simpleCards("CATalog", "<p>CATalog is a sample manager: folders, tags, search, a preview player and drag-out to your DAW. This page is a design mockup with generated test samples. \"+ Folder\" can scan a folder on your computer; files are read in this tab only and never uploaded. Stems and the Splice tab are layout only.</p>",
-  "<h3>How to use</h3><ul><li>Pick a folder or tags on the left, or type in Search.</li><li>Click a sample to hear it (Auto-play), arrow keys move through the list.</li><li>Pitch, Sync and Volume change the preview only.</li><li>Click a tag to remove it, type in the box to add one, star it, rate it.</li><li>Drag the Drag to DAW box to take the sample out.</li></ul>");
-setView(); renderTree(); renderChips(); renderTable(); $("#bAuto").setAttribute("aria-pressed", String(S.pAuto)); $("#bLoop").setAttribute("aria-pressed", String(!!S.loopP)); $("#bFav").setAttribute("aria-pressed", String(!!S.favOnly));
+var FACT = [{ name: "Everything", v: mx({}) }, { name: "Drums", v: mx({ fol: "Drums" }) }, { name: "Kicks, hard", v: mx({ fol: "Drums/Kicks", tags: '["hard"]' }) }, { name: "Loops, synced", v: mx({ fol: "Loops", loopP: true, sync: true }) }, { name: "Bass notes", v: mx({ fol: "Bass", sort: "key" }) }, { name: "Build and FX", v: mx({ fol: "FX" }) }, { name: "Favourites", v: mx({ favOnly: true }) }, { name: "Only kicks", v: mx({ ftype: "kick" }) }, { name: "Only hats", v: mx({ ftype: "hat" }) }, { name: "Only vocals", v: mx({ ftype: "vocal" }) }, { name: "Loops, any type", v: mx({ ftype: "loop" }) }, { name: "Drum loops, synced", v: mx({ ftype: "drum loop", loopP: true, sync: true }) }];
+initPresets(FACT, KEYS, function () { renderTree(); renderChips(); renderTbar(); renderTable(); });
+simpleCards("CATalog", "<p>CATalog is a sample manager: folders, tags, search, a preview player and drag-out to your DAW. This page is a design mockup with generated test samples. \"Import folder\" reads a folder and every subfolder inside it; files are read in this tab only and never uploaded. The mockup guesses type, BPM and key for imported files (type also from file and folder names). The Splice tab has no login: you choose the folder Splice saves into and CATalog watches it. The Stems tab lists stem files found next to a loop; it does not split audio.</p>",
+  "<h3>How to use</h3><ul><li>Pick a folder or tags on the left, or type in Search.</li><li>Click a sample to hear it (Auto-play), arrow keys move through the list.</li><li>Pitch, Sync and Volume change the preview only.</li><li>Click a tag to remove it, type in the box to add one, star it, rate it.</li><li>Drag the Drag to DAW box to take the sample out.</li><li>The Type row filters by drums, hats, synth, stabs, bass, vocal, FX and more. Genre and Key menus sit next to the search. Change a wrong type in the preview.</li><li>Presets at the top save your current view (filters, sort, preview settings).</li></ul>");
+setView(); renderTree(); renderChips(); renderTbar(); renderTable(); renderSplice(); $("#bAuto").setAttribute("aria-pressed", String(S.pAuto)); $("#bLoop").setAttribute("aria-pressed", String(!!S.loopP)); $("#bFav").setAttribute("aria-pressed", String(!!S.favOnly));
 select(LIB[0].id, false); initWin();
 
 

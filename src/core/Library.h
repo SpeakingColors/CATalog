@@ -11,6 +11,7 @@
 #include <sstream>
 #include <cctype>
 #include <cstdlib>
+#include "Analysis.h"
 
 namespace catalog {
 
@@ -26,10 +27,16 @@ struct Sample {
     double bpm = 0;              // 0 = unknown
     std::string key;             // e.g. "Am", "C#", "" = unknown
     double bytes = 0;
+    std::string type;            // kick, snare, hat, perc, bass, synth, stab, pad, lead, vocal, fx, loop, drum loop ("" = unknown)
+    std::string typeSrc;         // where the type came from: "name" (file or folder words), "audio" (analysed) or "user"
+    std::string genre;           // house, techno, trap... only from words in the file or folder name; "" = unknown
+    double duration = 0;         // seconds, 0 until analysed
+    bool analysed = false;
+    std::string bank;            // name of the imported folder this sample came from ("" for a plain scan)
 };
 
 inline bool isAudioFile(const std::string& ext) {
-    static const std::set<std::string> e { ".wav", ".aif", ".aiff", ".flac", ".ogg", ".mp3" };
+    static const std::set<std::string> e { ".wav", ".wave", ".bwf", ".aif", ".aiff", ".aifc", ".flac", ".ogg", ".oga", ".opus", ".mp3", ".m4a", ".mp4", ".aac", ".wma", ".caf", ".w64", ".webm" };
     return e.count(lower(ext)) > 0;
 }
 
@@ -65,6 +72,71 @@ inline std::string guessKey(const std::string& name) {
     return "";
 }
 
+
+// Words in a file or folder name (split on punctuation and camelCase), lower case.
+inline std::vector<std::string> words(const std::string& s) {
+    std::vector<std::string> w; std::string cur;
+    for (size_t i = 0; i <= s.size(); ++i) {
+        const char c = i < s.size() ? s[i] : ' ';
+        if (std::isalnum((unsigned char) c)) { if (!cur.empty() && std::isupper((unsigned char) c) && std::islower((unsigned char) cur.back())) { w.push_back(lower(cur)); cur.clear(); } cur += c; }
+        else { if (!cur.empty()) w.push_back(lower(cur)); cur.clear(); }
+    }
+    return w;
+}
+inline bool hasWord(const std::vector<std::string>& w, std::initializer_list<const char*> any) { for (auto& x : w) for (auto a : any) if (x == a) return true; return false; }
+// Type from words in the file name first, then the folder names. "" if no word says.
+inline std::string guessType(const std::string& name, const std::string& folder) {
+    struct R { const char* type; std::initializer_list<const char*> k; };
+    static const R rules[] = {
+        { "kick", { "kick", "kicks", "bd", "bassdrum" } }, { "snare", { "snare", "snares", "sn", "rimshot", "rim" } }, { "clap", { "clap", "claps" } },
+        { "hat", { "hat", "hats", "hihat", "hihats", "hh", "ohh", "chh", "cymbal", "cymbals", "ride", "shaker", "shakers" } },
+        { "perc", { "perc", "percussion", "tom", "toms", "conga", "bongo", "tambourine", "cowbell", "clave" } },
+        { "vocal", { "vocal", "vocals", "vox", "voice", "acapella", "acappella", "chant", "choir", "adlib", "adlibs" } },
+        { "bass", { "bass", "808", "808s", "sub", "reese" } }, { "stab", { "stab", "stabs", "chord", "chords", "hit", "hits" } },
+        { "pad", { "pad", "pads", "atmosphere", "atmos", "drone", "ambience" } }, { "lead", { "lead", "leads", "pluck", "plucks", "arp", "arps" } },
+        { "fx", { "fx", "sfx", "riser", "risers", "impact", "impacts", "sweep", "sweeps", "downlifter", "uplifter", "noise", "whoosh", "transition", "transitions", "foley" } },
+        { "synth", { "synth", "synths", "keys", "piano", "organ", "rhodes", "strings", "guitar" } },
+    };
+    const auto nw = words(name), fw = words(folder);
+    const bool loop = hasWord(nw, { "loop", "loops" }) || hasWord(fw, { "loop", "loops" });
+    const bool drumWord = hasWord(nw, { "drum", "drums", "break", "breaks", "breakbeat" }) || hasWord(fw, { "drum", "drums", "break", "breaks", "breakbeat" });
+    for (const auto* w : { &nw, &fw }) {
+        for (auto& r : rules) if (hasWord(*w, r.k)) {
+            const std::string t = r.type;
+            if (loop && (t == "kick" || t == "snare" || t == "hat" || t == "perc" || t == "clap")) return "drum loop";
+            return t;
+        }
+    }
+    if (loop) return drumWord ? "drum loop" : "loop";
+    return "";
+}
+inline std::string guessGenre(const std::string& name, const std::string& folder) {
+    struct R { const char* genre; std::initializer_list<const char*> k; };
+    static const R rules[] = {
+        { "drum and bass", { "dnb", "drumnbass", "jungle", "neurofunk" } }, { "dubstep", { "dubstep", "riddim", "brostep" } },
+        { "trap", { "trap", "drill", "phonk" } }, { "hip hop", { "hiphop", "boombap", "lofi" } },
+        { "techno", { "techno", "hardtechno" } }, { "house", { "house", "deephouse", "disco" } },
+        { "trance", { "trance", "psytrance" } }, { "hardstyle", { "hardstyle", "hardcore", "gabber" } }, { "ambient", { "ambient", "cinematic", "soundscape" } },
+        { "edm", { "edm", "bigroom", "futurebass" } }, { "pop", { "pop", "kpop" } }, { "rock", { "rock", "metal", "punk" } },
+        { "r&b", { "rnb", "soul", "funk" } }, { "reggaeton", { "reggaeton", "dancehall", "afrobeat" } }, { "synthwave", { "synthwave", "retrowave", "vaporwave" } },
+    };
+    const auto fw = words(folder), nw = words(name);
+    for (const auto* w : { &nw, &fw }) {
+        for (auto& r : rules) if (hasWord(*w, r.k)) return r.genre;
+        for (size_t i = 0; i + 1 < w->size(); ++i) {
+            const auto& a = (*w)[i]; const auto& b = (*w)[i + 1];
+            if (a == "drum" && (b == "bass" || b == "and")) return "drum and bass";
+            if (a == "hip" && b == "hop") return "hip hop"; if (a == "dn" && b == "b") return "drum and bass"; if ((a == "deep" || a == "tech") && b == "house") return "house";
+        }
+    }
+    return "";
+}
+// Stem files: "Loop_drums.wav", "Loop - Bass.wav", "Loop (Vocals).wav", or a folder "Loop stems/" holding "drums.wav", "bass.wav"...
+inline std::string stemKindOf(const std::string& w) {
+    static const std::map<std::string, std::string> m { { "drums", "drums" }, { "drum", "drums" }, { "bass", "bass" }, { "vocals", "vocals" }, { "vocal", "vocals" }, { "vox", "vocals" }, { "other", "other" }, { "piano", "piano" }, { "guitar", "guitar" }, { "synth", "synth" }, { "perc", "perc" }, { "percussion", "perc" }, { "fx", "fx" }, { "instrumental", "instrumental" }, { "inst", "instrumental" }, { "melody", "melody" } };
+    auto it = m.find(w); return it == m.end() ? "" : it->second;
+}
+
 struct Query {
     std::string text;                // every word must be found in name, tags, key, bpm or folder
     std::vector<std::string> tags;   // every tag must be on the sample
@@ -72,6 +144,9 @@ struct Query {
     bool favOnly = false;
     int minRating = 0;
     double bpmMin = 0, bpmMax = 0;   // 0 = no limit
+    std::string type;                // '' = any; kick, snare, hat, ... ("unknown" = not classified)
+    std::string genre;               // '' = any
+    std::string key;                 // '' = any; exact key like "Am"
     std::string sort = "name";       // name, bpm, key, rating, size
 };
 
@@ -79,36 +154,111 @@ class Library {
 public:
     std::vector<Sample> samples;
     std::string root;
+    std::vector<std::string> roots;      // imported folders (banks); each is scanned recursively, subfolders included
+    struct Stem { std::string kind, rel; };
 
-    // Scan a folder tree. Existing user data (tags, favourites, ratings) for the same relative path is kept; folder names become tags once.
+    // Scan one folder tree (all subfolders) and make it the whole library. Relative paths are relative to that folder. Tags, favourites,
+    // ratings and analysis for the same relative path are kept; folder names become tags once.
     int scan(const std::string& dir, bool folderTags = true) {
-        namespace fs = std::filesystem; std::error_code ec; root = dir;
+        root = dir; roots.assign(1, dir); std::map<std::string, Sample> old; for (auto& s : samples) old[s.rel] = s;
+        samples = collect(dir, false, folderTags, old); return (int) samples.size();
+    }
+    // Add a folder (a bank) to the library and keep what is already there. Every subfolder at any depth is scanned. The bank's own name is the first
+    // folder level ("MyPacks/Drums/Kicks/k1.wav") so two banks can hold the same file names. Returns how many samples are new; adding it twice adds none.
+    int importFolder(const std::string& dir, bool folderTags = true) {
+        namespace fs = std::filesystem; std::error_code ec; if (!fs::is_directory(dir, ec)) return 0;
+        const std::string canon = fs::weakly_canonical(dir, ec).string(); const std::string use = ec || canon.empty() ? dir : canon;
+        if (std::find(roots.begin(), roots.end(), use) == roots.end()) roots.push_back(use);
+        if (root.empty()) root = use;
         std::map<std::string, Sample> old; for (auto& s : samples) old[s.rel] = s;
-        std::vector<Sample> out;
+        std::set<std::string> have; for (auto& s : samples) have.insert(s.rel);
+        int n = 0; for (auto& s : collect(use, true, folderTags, old)) if (!have.count(s.rel)) { samples.push_back(std::move(s)); ++n; }
+        sortSamples(); return n;
+    }
+    // Look again at every imported folder: new files appear, deleted ones go, your tags and analysis stay. This is what "watch this folder" calls.
+    int rescanAll(bool folderTags = true) {
+        std::map<std::string, Sample> old; for (auto& s : samples) old[s.rel] = s;
+        const bool banks = roots.size() > 1 || (!samples.empty() && !samples.front().bank.empty());
+        std::vector<Sample> out; std::set<std::string> seen;
+        for (auto& r : roots) for (auto& s : collect(r, banks, folderTags, old)) if (seen.insert(s.rel).second) out.push_back(std::move(s));
+        samples = std::move(out); sortSamples(); return (int) samples.size();
+    }
+    void sortSamples() { std::sort(samples.begin(), samples.end(), [](const Sample& a, const Sample& b) { return a.rel < b.rel; }); }
+
+    // Fold an analysis result into a sample. BPM, key and type that came from the name or from you are not overwritten.
+    static void applyAnalysis(Sample& s, const AudioInfo& a) {
+        if (!a.ok) return; s.duration = a.duration; s.analysed = true;
+        if (a.bpm > 0 && s.bpm == 0) s.bpm = a.bpm;
+        if (!a.key.empty() && s.key.empty()) s.key = a.key;
+        if (s.typeSrc != "user" && s.typeSrc != "name" && !a.type.empty()) { s.type = a.type; s.typeSrc = "audio"; }
+    }
+    // Plain wav is analysed here; other formats are decoded by the app (JUCE) and passed to applyAnalysis(s, analyse(mono, sr)).
+    bool analyseFile(Sample& s) { Audio a; if (!readWav(s.path, a)) return false; applyAnalysis(s, analyse(a.mono, a.sr)); return true; }
+
+    // Stem files that sit next to a loop. Same folder: "<name>_drums". Or inside a folder called "<name> stems" / "<name>_stems".
+    std::vector<Stem> stemsOf(const Sample& s) const {
+        std::vector<Stem> r; const std::string base = lower(s.name), pre = s.folder.empty() ? "" : lower(s.folder) + "/";
+        for (auto& o : samples) {
+            if (o.rel == s.rel) continue; const std::string on = lower(o.name), of = lower(o.folder); std::string kind;
+            if (o.folder == s.folder && on.size() > base.size() && on.compare(0, base.size(), base) == 0) { for (auto& w : words(on.substr(base.size()))) { kind = stemKindOf(w); if (!kind.empty()) break; } }
+            else if (of == pre + base + " stems" || of == pre + base + "_stems" || of == pre + base + " stem") { for (auto& w : words(on)) { kind = stemKindOf(w); if (!kind.empty()) break; } }
+            if (!kind.empty()) r.push_back({ kind, o.rel });
+        }
+        std::sort(r.begin(), r.end(), [](const Stem& a, const Stem& b) { return a.kind != b.kind ? a.kind < b.kind : a.rel < b.rel; }); return r;
+    }
+    std::vector<std::pair<std::string, int>> typeCounts() const { return countBy([](const Sample& s) { return s.type.empty() ? std::string("unknown") : s.type; }); }
+    std::vector<std::pair<std::string, int>> genreCounts() const { return countBy([](const Sample& s) { return s.genre; }); }
+    std::vector<std::pair<std::string, int>> keyCounts() const { return countBy([](const Sample& s) { return s.key; }); }
+
+    // Watch-folder helper: a cheap signature (audio file count and newest write time). The app polls it and calls rescanAll() when it changes.
+    static std::string folderSignature(const std::string& dir) {
+        namespace fs = std::filesystem; std::error_code ec; size_t n = 0; long long newest = 0;
+        for (fs::recursive_directory_iterator it(dir, fs::directory_options::skip_permission_denied, ec), end; it != end && !ec; it.increment(ec)) {
+            if (!it->is_regular_file(ec) || !isAudioFile(it->path().extension().string())) continue; ++n;
+            const long long t = (long long) it->last_write_time(ec).time_since_epoch().count(); if (t > newest) newest = t;
+        }
+        return std::to_string(n) + ":" + std::to_string(newest);
+    }
+
+private:
+    template <class F> std::vector<std::pair<std::string, int>> countBy(F f) const {
+        std::map<std::string, int> c; for (auto& s : samples) { const std::string k = f(s); if (!k.empty()) ++c[k]; }
+        std::vector<std::pair<std::string, int>> v(c.begin(), c.end()); std::stable_sort(v.begin(), v.end(), [](auto& a, auto& b) { return a.second > b.second; }); return v;
+    }
+    static std::vector<Sample> collect(const std::string& dir, bool withBank, bool folderTags, const std::map<std::string, Sample>& old) {
+        namespace fs = std::filesystem; std::error_code ec; std::vector<Sample> out;
+        std::string bank; if (withBank) { bank = fs::path(dir).filename().string(); if (bank.empty()) bank = fs::path(dir).parent_path().filename().string(); if (bank.empty()) bank = "Samples"; }
         for (fs::recursive_directory_iterator it(dir, fs::directory_options::skip_permission_denied, ec), end; it != end && !ec; it.increment(ec)) {
             if (!it->is_regular_file(ec) || !isAudioFile(it->path().extension().string())) continue;
-            Sample s; s.path = it->path().string(); s.rel = fs::relative(it->path(), dir, ec).generic_string();
+            Sample s; s.path = it->path().string(); const std::string rel = fs::relative(it->path(), dir, ec).generic_string(); s.rel = withBank ? bank + "/" + rel : rel; s.bank = bank;
             s.name = it->path().stem().string(); const auto par = fs::path(s.rel).parent_path().generic_string(); s.folder = par == "." ? "" : par;
             s.bytes = (double) it->file_size(ec);
             s.bpm = guessBpm(s.name); if (s.bpm == 0) s.bpm = guessBpm(s.folder); s.key = guessKey(s.name);
+            s.type = guessType(s.name, s.folder); if (!s.type.empty()) s.typeSrc = "name"; s.genre = guessGenre(s.name, s.folder);
             auto o = old.find(s.rel);
-            if (o != old.end()) { s.tags = o->second.tags; s.fav = o->second.fav; s.rating = o->second.rating; if (o->second.bpm > 0) s.bpm = o->second.bpm; if (!o->second.key.empty()) s.key = o->second.key; }
+            if (o != old.end()) {
+                s.tags = o->second.tags; s.fav = o->second.fav; s.rating = o->second.rating; if (o->second.bpm > 0) s.bpm = o->second.bpm; if (!o->second.key.empty()) s.key = o->second.key;
+                s.analysed = o->second.analysed; s.duration = o->second.duration;
+                if (o->second.typeSrc == "user" || (o->second.typeSrc == "audio" && s.type.empty())) { s.type = o->second.type; s.typeSrc = o->second.typeSrc; }
+            }
             else if (folderTags) { std::stringstream ss(s.folder); std::string p; while (std::getline(ss, p, '/')) { p = lower(p); p.erase(std::remove_if(p.begin(), p.end(), [](unsigned char c) { return !(std::isalnum(c) || c == ' ' || c == '-'); }), p.end()); if (!p.empty() && std::find(s.tags.begin(), s.tags.end(), p) == s.tags.end()) s.tags.push_back(p); } }
             out.push_back(std::move(s));
         }
-        std::sort(out.begin(), out.end(), [](const Sample& a, const Sample& b) { return a.rel < b.rel; });
-        samples = std::move(out); return (int) samples.size();
+        std::sort(out.begin(), out.end(), [](const Sample& a, const Sample& b) { return a.rel < b.rel; }); return out;
     }
+public:
 
     std::vector<const Sample*> find(const Query& q) const {
         std::vector<std::string> words; { std::stringstream ss(lower(q.text)); std::string w; while (ss >> w) words.push_back(w); }
         std::vector<const Sample*> r;
         for (const auto& s : samples) {
             if (!q.folder.empty() && !(s.folder == q.folder || s.folder.compare(0, q.folder.size() + 1, q.folder + "/") == 0)) continue;
+            if (!q.type.empty() && (q.type == "unknown" ? !s.type.empty() : s.type != q.type)) continue;
+            if (!q.genre.empty() && s.genre != q.genre) continue; if (!q.key.empty() && s.key != q.key) continue;
             if (q.favOnly && !s.fav) continue; if (s.rating < q.minRating) continue;
             if (q.bpmMin > 0 && s.bpm < q.bpmMin) continue; if (q.bpmMax > 0 && (s.bpm <= 0 || s.bpm > q.bpmMax)) continue;
             bool ok = true; for (const auto& t : q.tags) if (std::find(s.tags.begin(), s.tags.end(), lower(t)) == s.tags.end()) { ok = false; break; } if (!ok) continue;
-            if (!words.empty()) { std::string hay = lower(s.name + " " + s.key + " " + s.folder + " " + (s.bpm > 0 ? std::to_string((int) s.bpm) : "")); for (auto& t : s.tags) hay += " " + t; for (auto& w : words) if (hay.find(w) == std::string::npos) { ok = false; break; } if (!ok) continue; }
+            if (!words.empty()) { std::string hay = lower(s.name + " " + s.key + " " + s.folder + " " + (s.bpm > 0 ? std::to_string((int) s.bpm) : "") + " " + s.type + " " + s.genre); for (auto& t : s.tags) hay += " " + t; for (auto& w : words) if (hay.find(w) == std::string::npos) { ok = false; break; } if (!ok) continue; }
             r.push_back(&s);
         }
         auto byName = [](const Sample* a, const Sample* b) { return natural(a->name, b->name); };
@@ -142,12 +292,13 @@ public:
     }
     Sample* byRel(const std::string& rel) { for (auto& s : samples) if (s.rel == rel) return &s; return nullptr; }
     static void addTag(Sample& s, std::string t) { t = lower(t); t.erase(std::remove_if(t.begin(), t.end(), [](unsigned char c) { return !(std::isalnum(c) || c == ' ' || c == '-'); }), t.end()); if (!t.empty() && std::find(s.tags.begin(), s.tags.end(), t) == s.tags.end()) s.tags.push_back(t); }
+    static void setType(Sample& s, std::string t) { t = lower(t); if (t.empty()) { s.type.clear(); s.typeSrc.clear(); } else { s.type = t; s.typeSrc = "user"; } }
     static void removeTag(Sample& s, const std::string& t) { s.tags.erase(std::remove(s.tags.begin(), s.tags.end(), lower(t)), s.tags.end()); }
 
     // Your data only (not the audio): one line per sample, tab separated: rel, fav, rating, bpm, key, tags comma separated. Plain text, easy to back up and diff.
     bool saveMeta(const std::string& file) const {
         std::ofstream o(file, std::ios::trunc); if (!o) return false; o << "CATalog meta v1\n";
-        for (auto& s : samples) { if (s.tags.empty() && !s.fav && s.rating == 0) continue; o << s.rel << '\t' << (s.fav ? 1 : 0) << '\t' << s.rating << '\t' << s.bpm << '\t' << s.key << '\t'; for (size_t i = 0; i < s.tags.size(); ++i) o << (i ? "," : "") << s.tags[i]; o << '\n'; }
+        for (auto& s : samples) { if (s.tags.empty() && !s.fav && s.rating == 0 && s.typeSrc != "user") continue; o << s.rel << '\t' << (s.fav ? 1 : 0) << '\t' << s.rating << '\t' << s.bpm << '\t' << s.key << '\t'; for (size_t i = 0; i < s.tags.size(); ++i) o << (i ? "," : "") << s.tags[i]; o << '\t' << (s.typeSrc == "user" ? s.type : std::string()) << '\n'; }
         return (bool) o;
     }
     // Applies saved data to the samples already scanned. Returns how many samples were touched.
@@ -157,7 +308,8 @@ public:
             std::vector<std::string> f; std::string cur; for (char c : line) { if (c == '\t') { f.push_back(cur); cur.clear(); } else cur += c; } f.push_back(cur);
             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
             s->fav = f[1] == "1"; s->rating = std::max(0, std::min(5, std::atoi(f[2].c_str()))); const double b = std::atof(f[3].c_str()); if (b > 0) s->bpm = b; if (!f[4].empty()) s->key = f[4];
-            s->tags.clear(); std::stringstream ts(f[5]); std::string t; while (std::getline(ts, t, ',')) if (!t.empty()) s->tags.push_back(t); ++n;
+            s->tags.clear(); std::stringstream ts(f[5]); std::string t; while (std::getline(ts, t, ',')) if (!t.empty()) s->tags.push_back(t); if (f.size() >= 7 && !f[6].empty()) { s->type = f[6]; s->typeSrc = "user"; }
+            ++n;
         }
         return n;
     }
