@@ -1,0 +1,25 @@
+# Intro
+CATalog is a sample manager. Import your sample folders and it finds the type, BPM, key and (from names) genre of each file, so you can search, tag, rate, favourite and listen.
+
+# Quick start
+- Press Import folder and pick a folder. Every subfolder at any depth is read. Add as many folders as you like.
+- Pick a type in the type filter (kick, snare, hat, bass, synth, stab, pad, lead, vocal, fx, loop and more), or type words in the search box.
+- Click a sample to listen. Double click to mark it as a favourite.
+- Note: this version has a plain list window. The designed window (folder tree, tag chips, waveform, spectrogram, key and BPM sync preview) is in the mockup in the repository and is not built yet.
+
+# Formats
+- wav, aiff, flac, ogg, mp3, m4a, aac, opus and more. What plays depends on the decoders in your system.
+
+# Auto-detect
+- BPM and key come from the file name when it says so, otherwise from the audio itself. Type comes from file and folder words first, then from the sound. Genre only comes from words in file or folder names. These are estimates: you can fix a wrong type and it is remembered.
+- Your tags, favourites, ratings and fixes are kept in a plain text file and survive rescans.
+
+# Splice
+- Splice has no public API for other apps, so there is no Splice login in CATalog. Choose the folder where Splice saves its samples with Splice save folder; CATalog watches it and imports new files. Open Splice opens the Splice website or app.
+
+# Stems
+- If stem files sit next to a loop (names like Loop_drums, Loop_bass, or a Loop stems folder), they are listed under the selected loop. CATalog does not split audio into stems.
+
+# Recommendations
+- Import a small folder first and check the types before importing your whole library.
+- Not tried on a real large library yet: please report wrong detections on GitHub.
