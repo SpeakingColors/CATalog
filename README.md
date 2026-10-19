@@ -5,7 +5,7 @@
 Sample manager for your studio.
 
 ## Status
-Early work in progress. Free and open source. Donations welcome (link coming).
+Early work in progress. Free and open source. Donations welcome: https://ko-fi.com/studio87
 
 ## Docs
 - [Roadmap](ROADMAP.md)
