@@ -38,7 +38,7 @@ Call Stack (most recent call first):
   CMakeLists.txt:9 (juce_add_plugin)
 
 
--- Configuring done (67.0s)
+-- Configuring done (59.5s)
 -- Generating done (0.0s)
 -- Build files have been written to: /home/runner/work/CATalog/CATalog/build
 [  2%] Building VST3 manifest helper for CATalog
@@ -62,7 +62,7 @@ gmake[3]: warning: jobserver unavailable: using -j1.  Add '+' to parent make rul
 [ 11%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_extra/juce_gui_extra.cpp.o
 In file included from /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:14,
                  from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:7,
-                 from /home/runner/work/CATalog/CATalog/src/Plugins.cpp:2:
+                 from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:1:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Analysis.h: In function ‘std::string catalog::detectKey(const std::vector<float, std::allocator<float> >&, double, double*)’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Analysis.h:92:103: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
    92 |             const double den = m[b - 1] - 2 * m[b] + m[b + 1], d = 0.5 * (m[b - 1] - m[b + 1]) / (den != 0 ? den : 1), f = ((double) b + d) * bh;
@@ -82,7 +82,7 @@ In file included from /home/runner/work/CATalog/CATalog/src/catalog/../core/Libr
       |                              ^
 In file included from /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:14,
                  from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:7,
-                 from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:1:
+                 from /home/runner/work/CATalog/CATalog/src/Plugins.cpp:2:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Analysis.h: In function ‘std::string catalog::detectKey(const std::vector<float, std::allocator<float> >&, double, double*)’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Analysis.h:92:103: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
    92 |             const double den = m[b - 1] - 2 * m[b] + m[b + 1], d = 0.5 * (m[b - 1] - m[b + 1]) / (den != 0 ? den : 1), f = ((double) b + d) * bh;
@@ -138,57 +138,6 @@ In file included from /home/runner/work/CATalog/CATalog/src/catalog/../core/Libr
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:217:102: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   217 |             if (!it->is_regular_file(ec) || !isAudioFile(it->path().extension().string())) continue; ++n;
       |                                                                                                      ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static std::vector<catalog::Sample> catalog::Library::collect(const std::string&, bool, bool, const std::map<std::__cxx11::basic_string<char>, catalog::Sample>&)’:
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:236:49: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
-  236 |             s.bpm = guessBpm(s.name); if (s.bpm == 0) s.bpm = guessBpm(s.folder); s.key = guessKey(s.name);
-      |                                           ~~~~~~^~~~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In member function ‘std::vector<const catalog::Sample*> catalog::Library::find(const catalog::Query&) const’:
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:257:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
-  257 |             if (!q.genre.empty() && s.genre != q.genre) continue; if (!q.key.empty() && s.key != q.key) continue;
-      |             ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:257:67: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
-  257 |             if (!q.genre.empty() && s.genre != q.genre) continue; if (!q.key.empty() && s.key != q.key) continue;
-      |                                                                   ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:258:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
-  258 |             if (q.favOnly && !s.fav) continue; if (s.rating < q.minRating) continue;
-      |             ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:258:48: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
-  258 |             if (q.favOnly && !s.fav) continue; if (s.rating < q.minRating) continue;
-      |                                                ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:259:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
-  259 |             if (q.bpmMin > 0 && s.bpm < q.bpmMin) continue; if (q.bpmMax > 0 && (s.bpm <= 0 || s.bpm > q.bpmMax)) continue;
-      |             ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:259:61: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
-  259 |             if (q.bpmMin > 0 && s.bpm < q.bpmMin) continue; if (q.bpmMax > 0 && (s.bpm <= 0 || s.bpm > q.bpmMax)) continue;
-      |                                                             ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In lambda function:
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:265:121: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
-  265 |         if (q.sort == "bpm") std::stable_sort(r.begin(), r.end(), [&](const Sample* a, const Sample* b) { return a->bpm != b->bpm ? a->bpm > b->bpm : byName(a, b); });
-      |                                                                                                                  ~~~~~~~^~~~~~~~~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static bool catalog::Library::natural(const std::string&, const std::string&)’:
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:279:17: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
-  279 |                 if (x != y) return x < y; i = i2; j = j2;
-      |                 ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:279:43: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
-  279 |                 if (x != y) return x < y; i = i2; j = j2;
-      |                                           ^
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In member function ‘int catalog::Library::loadMeta(const std::string&)’:
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:309:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
-  309 |             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
-      |             ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:309:41: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
-  309 |             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
-      |                                         ^~~~~~
-In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/juce_audio_processors_headless.h:145,
-                 from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors.h:64,
-                 from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:4:
-/home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/processors/juce_AudioProcessor.h: At global scope:
-/home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/processors/juce_AudioProcessor.h:292:18: warning: ‘virtual void juce::AudioProcessor::processBlock(juce::AudioBuffer<double>&, juce::MidiBuffer&)’ was hidden [-Woverloaded-virtual=]
-  292 |     virtual void processBlock (AudioBuffer<double>& buffer,
-      |                  ^~~~~~~~~~~~
-/home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:19:10: note:   by ‘virtual void CATalogProcessor::processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&)’
-   19 |     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-      |          ^~~~~~~~~~~~
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static void catalog::Library::applyAnalysis(catalog::Sample&, const catalog::AudioInfo&)’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:190:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
   190 |         if (!a.ok) return; s.duration = a.duration; s.analysed = true;
@@ -206,6 +155,10 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:202:43: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   202 |             if (o.rel == s.rel) continue; const std::string on = lower(o.name), of = lower(o.folder); std::string kind;
       |                                           ^~~~~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static std::vector<catalog::Sample> catalog::Library::collect(const std::string&, bool, bool, const std::map<std::__cxx11::basic_string<char>, catalog::Sample>&)’:
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:236:49: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
+  236 |             s.bpm = guessBpm(s.name); if (s.bpm == 0) s.bpm = guessBpm(s.folder); s.key = guessKey(s.name);
+      |                                           ~~~~~~^~~~
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static std::string catalog::Library::folderSignature(const std::string&)’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:217:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
   217 |             if (!it->is_regular_file(ec) || !isAudioFile(it->path().extension().string())) continue; ++n;
@@ -213,10 +166,6 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:217:102: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   217 |             if (!it->is_regular_file(ec) || !isAudioFile(it->path().extension().string())) continue; ++n;
       |                                                                                                      ^~
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static std::vector<catalog::Sample> catalog::Library::collect(const std::string&, bool, bool, const std::map<std::__cxx11::basic_string<char>, catalog::Sample>&)’:
-/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:236:49: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
-  236 |             s.bpm = guessBpm(s.name); if (s.bpm == 0) s.bpm = guessBpm(s.folder); s.key = guessKey(s.name);
-      |                                           ~~~~~~^~~~
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In member function ‘std::vector<const catalog::Sample*> catalog::Library::find(const catalog::Query&) const’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:257:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
   257 |             if (!q.genre.empty() && s.genre != q.genre) continue; if (!q.key.empty() && s.key != q.key) continue;
@@ -240,6 +189,10 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:265:121: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
   265 |         if (q.sort == "bpm") std::stable_sort(r.begin(), r.end(), [&](const Sample* a, const Sample* b) { return a->bpm != b->bpm ? a->bpm > b->bpm : byName(a, b); });
       |                                                                                                                  ~~~~~~~^~~~~~~~~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static std::vector<catalog::Sample> catalog::Library::collect(const std::string&, bool, bool, const std::map<std::__cxx11::basic_string<char>, catalog::Sample>&)’:
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:236:49: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
+  236 |             s.bpm = guessBpm(s.name); if (s.bpm == 0) s.bpm = guessBpm(s.folder); s.key = guessKey(s.name);
+      |                                           ~~~~~~^~~~
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static bool catalog::Library::natural(const std::string&, const std::string&)’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:279:17: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
   279 |                 if (x != y) return x < y; i = i2; j = j2;
@@ -247,6 +200,10 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:279:43: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   279 |                 if (x != y) return x < y; i = i2; j = j2;
       |                                           ^
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In member function ‘std::vector<const catalog::Sample*> catalog::Library::find(const catalog::Query&) const’:
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:257:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  257 |             if (!q.genre.empty() && s.genre != q.genre) continue; if (!q.key.empty() && s.key != q.key) continue;
+      |             ^~
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In member function ‘int catalog::Library::loadMeta(const std::string&)’:
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:309:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
   309 |             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
@@ -254,6 +211,25 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:309:41: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   309 |             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
       |                                         ^~~~~~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:257:67: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  257 |             if (!q.genre.empty() && s.genre != q.genre) continue; if (!q.key.empty() && s.key != q.key) continue;
+      |                                                                   ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:258:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  258 |             if (q.favOnly && !s.fav) continue; if (s.rating < q.minRating) continue;
+      |             ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:258:48: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  258 |             if (q.favOnly && !s.fav) continue; if (s.rating < q.minRating) continue;
+      |                                                ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:259:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  259 |             if (q.bpmMin > 0 && s.bpm < q.bpmMin) continue; if (q.bpmMax > 0 && (s.bpm <= 0 || s.bpm > q.bpmMax)) continue;
+      |             ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:259:61: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  259 |             if (q.bpmMin > 0 && s.bpm < q.bpmMin) continue; if (q.bpmMax > 0 && (s.bpm <= 0 || s.bpm > q.bpmMax)) continue;
+      |                                                             ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In lambda function:
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:265:121: warning: comparing floating-point with ‘==’ or ‘!=’ is unsafe [-Wfloat-equal]
+  265 |         if (q.sort == "bpm") std::stable_sort(r.begin(), r.end(), [&](const Sample* a, const Sample* b) { return a->bpm != b->bpm ? a->bpm > b->bpm : byName(a, b); });
+      |                                                                                                                  ~~~~~~~^~~~~~~~~
 In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/juce_audio_processors_headless.h:145,
                  from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors.h:64,
                  from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:4:
@@ -264,6 +240,10 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:19:10: note:   by ‘virtual void CATalogProcessor::processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&)’
    19 |     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
       |          ^~~~~~~~~~~~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In static member function ‘static bool catalog::Library::natural(const std::string&, const std::string&)’:
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:279:17: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  279 |                 if (x != y) return x < y; i = i2; j = j2;
+      |                 ^~
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp: In member function ‘void CATalogProcessor::loadSettings()’:
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:36:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
    36 |         if (!f.isDirectory()) continue; if (k == "root") library.importFolder(f.getFullPathName().toStdString()); else if (k == "watch") { watchFolder = f; watchSig = catalog::Library::folderSignature(f.getFullPathName().toStdString()); } }
@@ -271,6 +251,9 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:36:41: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
    36 |         if (!f.isDirectory()) continue; if (k == "root") library.importFolder(f.getFullPathName().toStdString()); else if (k == "watch") { watchFolder = f; watchSig = catalog::Library::folderSignature(f.getFullPathName().toStdString()); } }
       |                                         ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:279:43: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  279 |                 if (x != y) return x < y; i = i2; j = j2;
+      |                                           ^
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp: In member function ‘int CATalogProcessor::analysePending(int)’:
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:67:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
    67 |         if (s.analysed) continue; if (done >= maxFiles) break; ++done;
@@ -278,6 +261,13 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:67:35: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
    67 |         if (s.analysed) continue; if (done >= maxFiles) break; ++done;
       |                                   ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h: In member function ‘int catalog::Library::loadMeta(const std::string&)’:
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:309:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  309 |             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
+      |             ^~
+/home/runner/work/CATalog/CATalog/src/catalog/../core/Library.h:309:41: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  309 |             if (f.size() < 6) continue; Sample* s = byRel(f[0]); if (!s) continue;
+      |                                         ^~~~~~
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp: In member function ‘virtual void {anonymous}::CATalogEditor::paintListBoxItem(int, juce::Graphics&, int, int, bool)’:
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:134:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
   134 |         if (row < 0 || row >= (int) rows.size()) return; const auto& s = *rows[(size_t) row];
@@ -298,6 +288,16 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.cpp:146:58: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   146 |         if (row < 0 || row >= (int) rows.size()) return; proc.audition(*rows[(size_t) row]);
       |                                                          ^~~~
+In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/juce_audio_processors_headless.h:145,
+                 from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors.h:64,
+                 from /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:4:
+/home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/processors/juce_AudioProcessor.h: At global scope:
+/home/runner/work/CATalog/CATalog/build/_deps/juce-src/modules/juce_audio_processors_headless/processors/juce_AudioProcessor.h:292:18: warning: ‘virtual void juce::AudioProcessor::processBlock(juce::AudioBuffer<double>&, juce::MidiBuffer&)’ was hidden [-Woverloaded-virtual=]
+  292 |     virtual void processBlock (AudioBuffer<double>& buffer,
+      |                  ^~~~~~~~~~~~
+/home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:19:10: note:   by ‘virtual void CATalogProcessor::processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&)’
+   19 |     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+      |          ^~~~~~~~~~~~
 [ 13%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_basics/juce_gui_basics.cpp.o
 [ 16%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_basics/juce_gui_basics_2.cpp.o
 [ 18%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_basics/juce_gui_basics_3.cpp.o
@@ -319,22 +319,22 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 [ 55%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_audio_devices/juce_audio_devices.cpp.o
 [ 58%] Linking CXX static library CATalog_artefacts/Release/libCATalog_SharedCode.a
 [ 58%] Built target CATalog
-[ 65%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp.o
-[ 65%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
+[ 60%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp.o
 [ 65%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp.o
+[ 65%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
 [ 67%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
+[ 69%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_ARA.cpp.o
 [ 72%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
-[ 76%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
-[ 72%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_ARA.cpp.o
-[ 76%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_ARA.cpp.o
-[ 83%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
-[ 83%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
+[ 74%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_ARA.cpp.o
+[ 76%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
+[ 79%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
+[ 81%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
 [ 83%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
 [ 86%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
-[ 90%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
-[ 90%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
-[ 93%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
-[ 95%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
+[ 88%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
+[ 93%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
+[ 93%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
+[ 95%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
 [ 97%] Linking CXX executable CATalog_artefacts/Release/Standalone/CATalog
 [ 97%] Built target CATalog_Standalone
 [100%] Linking CXX shared module CATalog_artefacts/Release/VST3/CATalog.vst3/Contents/x86_64-linux/CATalog.so
