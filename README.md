@@ -6,6 +6,8 @@ Sample manager for your studio (standalone and VST3): scan your sample folders, 
 
 **Manual:** [PDF, opens in the browser](https://github.com/SpeakingColors/CATalog/blob/main/docs/CATalog-manual.pdf)
 
+<p align="center"><img src="docs/screenshot.png" alt="CATalog sample manager" width="900"></p>
+
 ## Status
 Early. What exists today:
 - A tested pure C++ library model (`src/core`): import as many folders as you like (every subfolder at any depth is read), formats wav, aiff, flac, ogg, mp3, m4a, aac, opus and more (what plays depends on the decoders in your OS and JUCE), BPM and key from file names and from the audio itself (`Analysis.h`: onset curve for tempo, chroma profile for key, plain wav read directly; other formats are decoded by the app), type (kick, snare, hat, bass, synth, stab, pad, lead, vocal, fx, loop...) from file and folder words first and from the sound when the name says nothing, genre only from words in names, stem files found next to a loop (`Loop_drums`, `Loop_bass`, a `Loop stems` folder), watch-folder rescan, natural sort, search by words, tags, folder, type, genre, key, favourites, rating, BPM range, and your tags / favourites / ratings / type fixes kept in a plain text file that survives rescans. These are estimates, not certainties.
