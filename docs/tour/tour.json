@@ -1,0 +1,1016 @@
+{
+ "title": "CATalog",
+ "page": "docs/mockup/catalog.html",
+ "tabs": [
+  {
+   "label": "LIBRARY",
+   "img": "window_1.png",
+   "items": [
+    {
+     "n": 1,
+     "name": "Previous preset",
+     "tip": "Previous preset.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 2,
+     "name": "Init",
+     "tip": "Open the preset list: factory presets and your own.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 3,
+     "name": "Next preset",
+     "tip": "Next preset.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 4,
+     "name": "Save",
+     "tip": "Save the current settings as your own preset (stays on this device).",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 5,
+     "name": "Delete, export or import your presets",
+     "tip": "Delete, export or import your presets.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 6,
+     "name": "Guide",
+     "tip": "Quick guide: what each part does.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 7,
+     "name": "Settings",
+     "tip": "Info bubbles and eco mode.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 8,
+     "name": "About & Support",
+     "tip": "About Studio 87, privacy, and ways to support the project.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": true
+    },
+    {
+     "n": 9,
+     "name": "Library",
+     "tip": "Your sample library: folders, tags, search and a preview player. Shortcut: 1.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 10,
+     "name": "Stems",
+     "tip": "Stem files found next to the selected loop (names like Loop_drums, Loop_bass). Shortcut: 2.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 11,
+     "name": "Splice",
+     "tip": "Pick the folder Splice saves into and watch it. No Splice login in CATalog. Shortcut: 3.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 12,
+     "name": "Import folder",
+     "tip": "Add a folder of samples. Every subfolder inside it is read too, at any depth. Files stay on your computer; in this browser mockup they are read in this tab only and never uploaded.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": true
+    },
+    {
+     "n": 13,
+     "name": "Add files",
+     "tip": "Add single audio files.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": true
+    },
+    {
+     "n": 14,
+     "name": "clear",
+     "tip": "Clear the tag filter.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": true
+    },
+    {
+     "n": 15,
+     "name": "Search",
+     "tip": "Type words from the name, tags, key or BPM. Several words must all match.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 16,
+     "name": "Sort",
+     "tip": "Order of the list.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 17,
+     "name": "★ Favourites",
+     "tip": "Show only favourites.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 18,
+     "name": "Waveform",
+     "tip": "Click anywhere to play from that point.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 19,
+     "name": "Play",
+     "tip": "Play the selected sample. Shortcut: Space.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 20,
+     "name": "Loop",
+     "tip": "Loop the sample.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 21,
+     "name": "Auto-play",
+     "tip": "Play a sample as soon as you select it.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 22,
+     "name": "Spectrum",
+     "tip": "Live spectrum of what is playing, 20 Hz to 20 kHz, in dB.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 23,
+     "name": "Pitch",
+     "tip": "Preview pitch in semitones. It changes speed too, like a sampler. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 24,
+     "name": "Volume",
+     "tip": "Preview level. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 25,
+     "name": "Sync",
+     "tip": "Loops only: speeds the loop up or down to the host BPM.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 26,
+     "name": "Host BPM",
+     "tip": "The tempo your DAW runs at. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 28,
+     "name": "☆ Favourite",
+     "tip": "Mark as favourite.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 29,
+     "name": "Rate it",
+     "tip": "Rate it: click a star.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 30,
+     "name": "Drag out",
+     "tip": "Drag this to your DAW or desktop. In a browser it saves a WAV; in the plugin it drops the sample on a track.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 31,
+     "name": "Send this sample to the SupurrSaw waveta",
+     "tip": "Send this sample to the SupurrSaw wavetable and oscillator library. Plugin only.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": true
+    },
+    {
+     "n": 32,
+     "name": "Window 100 %",
+     "tip": "Window size. Drag any edge or corner of the plugin to resize it; the shape stays the same. Double-click here for 100 %.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": true
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    }
+   ]
+  },
+  {
+   "label": "STEMS",
+   "img": "window_2.png",
+   "items": [
+    {
+     "n": 1,
+     "name": "Previous preset",
+     "tip": "Previous preset.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 2,
+     "name": "Init",
+     "tip": "Open the preset list: factory presets and your own.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 3,
+     "name": "Next preset",
+     "tip": "Next preset.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 4,
+     "name": "Save",
+     "tip": "Save the current settings as your own preset (stays on this device).",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 5,
+     "name": "Delete, export or import your presets",
+     "tip": "Delete, export or import your presets.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 6,
+     "name": "Guide",
+     "tip": "Quick guide: what each part does.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 7,
+     "name": "Settings",
+     "tip": "Info bubbles and eco mode.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 8,
+     "name": "About & Support",
+     "tip": "About Studio 87, privacy, and ways to support the project.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 9,
+     "name": "Library",
+     "tip": "Your sample library: folders, tags, search and a preview player. Shortcut: 1.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 10,
+     "name": "Stems",
+     "tip": "Stem files found next to the selected loop (names like Loop_drums, Loop_bass). Shortcut: 2.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 11,
+     "name": "Splice",
+     "tip": "Pick the folder Splice saves into and watch it. No Splice login in CATalog. Shortcut: 3.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 12,
+     "name": "Import folder",
+     "tip": "Add a folder of samples. Every subfolder inside it is read too, at any depth. Files stay on your computer; in this browser mockup they are read in this tab only and never uploaded.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": false
+    },
+    {
+     "n": 13,
+     "name": "Add files",
+     "tip": "Add single audio files.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": false
+    },
+    {
+     "n": 14,
+     "name": "clear",
+     "tip": "Clear the tag filter.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": false
+    },
+    {
+     "n": 18,
+     "name": "Waveform",
+     "tip": "Click anywhere to play from that point.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 19,
+     "name": "Play",
+     "tip": "Play the selected sample. Shortcut: Space.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 20,
+     "name": "Loop",
+     "tip": "Loop the sample.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 21,
+     "name": "Auto-play",
+     "tip": "Play a sample as soon as you select it.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 22,
+     "name": "Spectrum",
+     "tip": "Live spectrum of what is playing, 20 Hz to 20 kHz, in dB.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 23,
+     "name": "Pitch",
+     "tip": "Preview pitch in semitones. It changes speed too, like a sampler. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 24,
+     "name": "Volume",
+     "tip": "Preview level. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 25,
+     "name": "Sync",
+     "tip": "Loops only: speeds the loop up or down to the host BPM.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 26,
+     "name": "Host BPM",
+     "tip": "The tempo your DAW runs at. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 28,
+     "name": "☆ Favourite",
+     "tip": "Mark as favourite.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 29,
+     "name": "Rate it",
+     "tip": "Rate it: click a star.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 30,
+     "name": "Drag out",
+     "tip": "Drag this to your DAW or desktop. In a browser it saves a WAV; in the plugin it drops the sample on a track.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 31,
+     "name": "Send this sample to the SupurrSaw waveta",
+     "tip": "Send this sample to the SupurrSaw wavetable and oscillator library. Plugin only.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 32,
+     "name": "Window 100 %",
+     "tip": "Window size. Drag any edge or corner of the plugin to resize it; the shape stays the same. Double-click here for 100 %.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    }
+   ]
+  },
+  {
+   "label": "SPLICE",
+   "img": "window_3.png",
+   "items": [
+    {
+     "n": 1,
+     "name": "Previous preset",
+     "tip": "Previous preset.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 2,
+     "name": "Init",
+     "tip": "Open the preset list: factory presets and your own.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 3,
+     "name": "Next preset",
+     "tip": "Next preset.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 4,
+     "name": "Save",
+     "tip": "Save the current settings as your own preset (stays on this device).",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 5,
+     "name": "Delete, export or import your presets",
+     "tip": "Delete, export or import your presets.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 6,
+     "name": "Guide",
+     "tip": "Quick guide: what each part does.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 7,
+     "name": "Settings",
+     "tip": "Info bubbles and eco mode.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 8,
+     "name": "About & Support",
+     "tip": "About Studio 87, privacy, and ways to support the project.",
+     "kind": "button",
+     "sec": "Header bar",
+     "fresh": false
+    },
+    {
+     "n": 9,
+     "name": "Library",
+     "tip": "Your sample library: folders, tags, search and a preview player. Shortcut: 1.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 10,
+     "name": "Stems",
+     "tip": "Stem files found next to the selected loop (names like Loop_drums, Loop_bass). Shortcut: 2.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 11,
+     "name": "Splice",
+     "tip": "Pick the folder Splice saves into and watch it. No Splice login in CATalog. Shortcut: 3.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 12,
+     "name": "Import folder",
+     "tip": "Add a folder of samples. Every subfolder inside it is read too, at any depth. Files stay on your computer; in this browser mockup they are read in this tab only and never uploaded.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": false
+    },
+    {
+     "n": 13,
+     "name": "Add files",
+     "tip": "Add single audio files.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": false
+    },
+    {
+     "n": 14,
+     "name": "clear",
+     "tip": "Clear the tag filter.",
+     "kind": "button",
+     "sec": "Import",
+     "fresh": false
+    },
+    {
+     "n": 34,
+     "name": "Open Splice",
+     "tip": "Opens splice.com in a new tab. In the plugin it opens the Splice app if it is installed. You sign in there, never here.",
+     "kind": "button",
+     "sec": "Splice",
+     "fresh": true
+    },
+    {
+     "n": 35,
+     "name": "Choose Splice save folder",
+     "tip": "Pick the folder Splice downloads into. Subfolders are included.",
+     "kind": "button",
+     "sec": "Splice",
+     "fresh": true
+    },
+    {
+     "n": 36,
+     "name": "Watch this folder",
+     "tip": "Keep looking at that folder and import new files as they arrive.",
+     "kind": "button",
+     "sec": "Splice",
+     "fresh": true
+    },
+    {
+     "n": 37,
+     "name": "Check now",
+     "tip": "Look at the folder now.",
+     "kind": "button",
+     "sec": "Splice",
+     "fresh": true
+    },
+    {
+     "n": 18,
+     "name": "Waveform",
+     "tip": "Click anywhere to play from that point.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 19,
+     "name": "Play",
+     "tip": "Play the selected sample. Shortcut: Space.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 20,
+     "name": "Loop",
+     "tip": "Loop the sample.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 21,
+     "name": "Auto-play",
+     "tip": "Play a sample as soon as you select it.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 22,
+     "name": "Spectrum",
+     "tip": "Live spectrum of what is playing, 20 Hz to 20 kHz, in dB.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 23,
+     "name": "Pitch",
+     "tip": "Preview pitch in semitones. It changes speed too, like a sampler. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 24,
+     "name": "Volume",
+     "tip": "Preview level. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 25,
+     "name": "Sync",
+     "tip": "Loops only: speeds the loop up or down to the host BPM.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 26,
+     "name": "Host BPM",
+     "tip": "The tempo your DAW runs at. Double-click resets.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 27,
+     "name": "Click to remove this tag",
+     "tip": "Click to remove this tag.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 28,
+     "name": "☆ Favourite",
+     "tip": "Mark as favourite.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 29,
+     "name": "Rate it",
+     "tip": "Rate it: click a star.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 30,
+     "name": "Drag out",
+     "tip": "Drag this to your DAW or desktop. In a browser it saves a WAV; in the plugin it drops the sample on a track.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 31,
+     "name": "Send this sample to the SupurrSaw waveta",
+     "tip": "Send this sample to the SupurrSaw wavetable and oscillator library. Plugin only.",
+     "kind": "button",
+     "sec": "Preview0:00.9",
+     "fresh": false
+    },
+    {
+     "n": 32,
+     "name": "Window 100 %",
+     "tip": "Window size. Drag any edge or corner of the plugin to resize it; the shape stays the same. Double-click here for 100 %.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    },
+    {
+     "n": 33,
+     "name": "Resize",
+     "tip": "Drag to resize the window. Every edge and corner works, and the shape stays the same.",
+     "kind": "button",
+     "sec": "Window",
+     "fresh": false
+    }
+   ]
+  }
+ ]
+}
