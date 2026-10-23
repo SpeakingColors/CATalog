@@ -4,6 +4,7 @@ Sample manager.
 
 ## Done
 - [x] Library model in pure C++ with unit tests (scan, name guesses, search, tags, favourites, ratings, saved metadata)
+- [x] Release packaging: installers (Windows, macOS, Linux Flatpak extension), uninstallers and PDF manual built by the release workflow (test builds, not tested on real machines)
 - [x] Import folders with all subfolders, more formats, type / genre / BPM / key analysis, stems found next to loops, Splice folder watch (core, tested)
 - [x] JUCE app / plugin shell with folder choice, search and audition, CI (core tests, configure, build)
 
