@@ -1,5 +1,5 @@
 // CATalog: the app / plugin. The library model is in src/core. The audio side is only the audition player; the editor is a plain
-// JUCE list for now (folder button, search, click to audition). The cat-ui editor from docs/mockup is on the ROADMAP.
+// editor is in CATalogEditor.cpp (cat-ui window from docs/mockup/catalog.html).
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_formats/juce_audio_formats.h>
@@ -40,12 +40,17 @@ public:
     void saveSettings() const;
     void audition(const catalog::Sample& s);
     void stopAudition() { transport.stop(); }
+    void setAuditionLoop(bool b) { loopAudition = b; if (source) source->setLooping(b); }
+    bool auditionPlaying() const { return transport.isPlaying(); }
+    double auditionSeconds() const { return transport.getCurrentPosition(); }
+    void replayAudition() { transport.setPosition(0.0); transport.start(); }
     void saveMeta() const;
     catalog::Library library;
     juce::File libraryFolder, watchFolder; std::string watchSig;
 
 private:
     juce::File metaFile() const; juce::File settingsFile() const; void loadSettings();
+    bool loopAudition = false;
     juce::AudioFormatManager formats; juce::AudioTransportSource transport; std::unique_ptr<juce::AudioFormatReaderSource> source;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CATalogProcessor)
 };
