@@ -11,7 +11,8 @@ Sample manager.
 ## Next
 - [ ] Try it on a real sample folder; tune the name guesses
 - [ ] Tune type, BPM and key analysis on real sample libraries
-- [ ] cat-ui editor from the mockup (folder tree, tag chips, waveform and spectrogram, preview with pitch and sync) drawn through `catui::RenderGate`
+- [x] cat-ui editor v1 (library, filters, preview, drag to the DAW)
+- [ ] editor: Stems and Splice tabs, spectrum, pitch and sync preview, send to SupurrSaw (as in the mockup)
 - [ ] Drag a sample out to the DAW
 - [ ] Waveform library shared with SupurrSaw (single-cycle WAVs)
 

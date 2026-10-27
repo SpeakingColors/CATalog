@@ -103,8 +103,9 @@ public:
         for (auto* cb : { &genreBox, &keyBox, &sortBox, &typeBox }) c.addAndMakeVisible(*cb);
         c.addAndMakeVisible(favOnly); c.addAndMakeVisible(typeChips); c.addAndMakeVisible(wave); c.addAndMakeVisible(dragPad); c.addAndMakeVisible(selTags); c.addAndMakeVisible(addTag);
         favOnly.setClickingTogglesState(true); loopB.setClickingTogglesState(true);
+        folderModel.o = this; tagModel.o = this; tagModel.tags = true;
         folderList.setModel(&folderModel); tagList.setModel(&tagModel); table.setModel(this);
-        folderModel.o = this; tagModel.o = this; folderList.setRowHeight(22); tagList.setRowHeight(22); table.setRowHeight(26);
+        folderList.setRowHeight(22); tagList.setRowHeight(22); table.setRowHeight(26);
         for (auto* l : { &folderList, &tagList, &table }) { l->setColour(juce::ListBox::backgroundColourId, Colour(0xff0c0d10)); l->setColour(juce::ListBox::outlineColourId, kEdge); l->setOutlineThickness(1); }
         search.setTextToShowWhenEmpty("Search names, tags, type...", kDim); search.addListener(this); search.setColour(juce::TextEditor::backgroundColourId, Colour(0xff0c0d10));
         addTag.setTextToShowWhenEmpty("+ tag", kDim); addTag.setColour(juce::TextEditor::backgroundColourId, Colour(0xff0c0d10));
@@ -112,6 +113,8 @@ public:
         sortBox.addItemList({ "Name", "BPM", "Key", "Rating", "Size" }, 1); sortBox.setSelectedId(1, juce::dontSendNotification);
         for (auto* cb : { &genreBox, &keyBox, &sortBox }) cb->onChange = [this] { refresh(); };
         favOnly.onClick = [this] { refresh(); };
+        typeBox.setTooltip("Fix the type of the selected sample. Your choice is kept in the library file and wins over the guess.");
+        typeBox.onChange = [this] { if (auto* s = selected()) { catalog::Library::setType(*s, typeBox.getSelectedId() > 1 ? typeBox.getText().toStdString() : std::string()); proc.saveMeta(); juce::MessageManager::callAsync([sp = juce::Component::SafePointer<CATalogEditor>(this)] { if (sp != nullptr) sp->refresh(); }); } };
         importB.setTooltip("Adds a folder and everything in its subfolders. You can add as many as you like.");
         watchB.setTooltip("Choose the folder Splice saves your downloads into. CATalog watches it and picks up new files. There is no Splice login here: Splice has no public API.");
         spliceB.setTooltip("Opens the Splice app (or splice.com). You sign in and download there.");
@@ -147,15 +150,14 @@ public:
     {
         if (row < 0 || row >= (int) rows.size()) return; const auto& s = *rows[(size_t) row];
         if (sel) g.fillAll(kGreen.withAlpha(0.14f)); else if (row % 2) g.fillAll(Colour(0x10ffffff));
-        g.setColour(s.fav ? kGold : kDim); g.setFont(sans(15.f)); g.drawText(s.fav ? "*" : "-", 6, 0, 18, h, juce::Justification::centred);
+        { juce::Path st; st.addStar({ 15.f, (float) h * 0.5f }, 5, 3.6f, 8.f); if (s.fav) { g.setColour(kGold); g.fillPath(st); } else { g.setColour(kDim.withAlpha(0.6f)); g.strokePath(st, juce::PathStrokeType(1.f)); } }
         g.setColour(kText); g.setFont(sans(14.f)); g.drawText(String(s.name), colName, 0, colType - colName - 6, h, juce::Justification::centredLeft, true);
         g.setColour(kDim); g.setFont(sans(13.f)); g.drawText(s.type.empty() ? "?" : String(s.type), colType, 0, colGenre - colType, h, juce::Justification::centredLeft, true);
         g.drawText(String(s.genre), colGenre, 0, colBpm - colGenre, h, juce::Justification::centredLeft, true);
         g.setColour(kGold); g.setFont(mono(13.f)); g.drawText(s.bpm > 0 ? String(juce::roundToInt(s.bpm)) : String(), colBpm, 0, colKey - colBpm, h, juce::Justification::centredLeft);
         g.drawText(String(s.key), colKey, 0, colLen - colKey, h, juce::Justification::centredLeft);
         g.setColour(kDim); if (s.duration > 0) g.drawText(String(s.duration, 1) + " s", colLen, 0, colTags - colLen, h, juce::Justification::centredLeft);
-        String t; for (auto& x : s.tags) t << (t.isEmpty() ? "" : ", ") << x; g.setFont(sans(12.f)); g.drawText(t, colTags, 0, w - colTags - 70, h, juce::Justification::centredLeft, true);
-        g.setColour(kGold); g.setFont(sans(12.f)); g.drawText(s.rating > 0 ? String::repeatedString("*", s.rating) : String(), w - 66, 0, 60, h, juce::Justification::centredRight);
+        String t; for (auto& x : s.tags) t << (t.isEmpty() ? "" : ", ") << x; g.setFont(sans(12.f)); g.drawText(t, colTags, 0, w - colTags - 6, h, juce::Justification::centredLeft, true);
     }
     void listBoxItemClicked(int row, const juce::MouseEvent& e) override
     {
@@ -196,7 +198,7 @@ private:
     ChipBar typeChips, selTags; WaveView wave; DragPad dragPad;
     std::vector<const catalog::Sample*> rows; std::vector<Item> folderItems, tagItems; std::set<std::string> tagSel; String folderSel, typeFilter, selRel, statusLine;
     std::unique_ptr<juce::FileChooser> chooser; size_t lastCount = (size_t) -1;
-    static constexpr int colName = 32, colType = 330, colGenre = 410, colBpm = 500, colKey = 560, colLen = 610, colTags = 680;
+    static constexpr int colName = 32, colType = 236, colGenre = 296, colBpm = 358, colKey = 400, colLen = 440, colTags = 496, cx0 = 258;
 
     float scale() const { return (float) getWidth() / (float) kBaseW; }
     catalog::Sample* selected() { return selRel.isEmpty() ? nullptr : proc.library.byRel(selRel.toStdString()); }
@@ -208,10 +210,10 @@ private:
     void layout()
     {
         guide.setBounds(900, 20, 90, 34); about.setBounds(1000, 20, 130, 34);
-        const int lx = 14, lw = 262, cx = 290, cw = 570, rx = 874, rw = 252;
-        importB.setBounds(lx, 100, lw, 34); watchB.setBounds(lx, 140, lw, 30); spliceB.setBounds(lx, 176, lw, 30);
+        const int lx = 14, lw = 230, cx = cx0, cw = 600, rx = 874, rw = 252;
+        importB.setBounds(lx, 106, lw, 34); watchB.setBounds(lx, 146, lw, 30); spliceB.setBounds(lx, 182, lw, 30);
         folderList.setBounds(lx, 244, lw, 270); tagList.setBounds(lx, 546, lw, 160);
-        typeChips.setBounds(cx, 98, cw, 52); search.setBounds(cx, 160, 190, 28); genreBox.setBounds(cx + 198, 160, 100, 28); keyBox.setBounds(cx + 304, 160, 76, 28); sortBox.setBounds(cx + 386, 160, 90, 28); favOnly.setBounds(cx + 484, 160, 86, 28);
+        typeChips.setBounds(cx, 106, cw, 50); search.setBounds(cx, 160, 200, 28); genreBox.setBounds(cx + 208, 160, 110, 28); keyBox.setBounds(cx + 324, 160, 80, 28); sortBox.setBounds(cx + 410, 160, 90, 28); favOnly.setBounds(cx + 506, 160, 94, 28);
         table.setBounds(cx, 226, cw, 480);
         wave.setBounds(rx, 128, rw, 90); playB.setBounds(rx, 226, 80, 32); loopB.setBounds(rx + 88, 226, 70, 32);
         typeBox.setBounds(rx, 268, 160, 28); selTags.setBounds(rx, 340, rw, 70); addTag.setBounds(rx, 416, 100, 24);
@@ -234,7 +236,9 @@ private:
     {
         auto* s = selected(); favB.setToggleState(s && s->fav, juce::dontSendNotification);
         selTags.chips.clear(); if (s) for (auto& t : s->tags) selTags.chips.push_back({ String(t) + " x", String(t), true }); selTags.repaint();
-        typeBox.clear(juce::dontSendNotification); typeBox.addItem("Type", 1); typeBox.setSelectedId(1, juce::dontSendNotification);
+        typeBox.clear(juce::dontSendNotification); typeBox.addItem("Type: unknown", 1); int pickId = 1, id = 2;
+        for (auto* t : { "kick", "snare", "clap", "hat", "perc", "bass", "synth", "stab", "pad", "lead", "vocal", "fx", "loop", "drum loop" }) { typeBox.addItem(t, id); if (s && s->type == t) pickId = id; ++id; }
+        typeBox.setSelectedId(pickId, juce::dontSendNotification); typeBox.setEnabled(s != nullptr);
     }
     void refresh()
     {
@@ -268,14 +272,13 @@ private:
         g.setColour(kGold); g.setFont(sans(14.f, true)); g.drawText("STUDIO 87", 98, 52, 200, 20, juce::Justification::left);
         g.setColour(kEdge); g.drawHorizontalLine(84, 14.f, 1126.f);
         auto lab = [&](const String& t, int x, int y) { g.setColour(kDim); g.setFont(sans(12.f, true)); g.drawText(t, x, y, 260, 16, juce::Justification::left); };
-        lab("IMPORT", 14, 82 + 0); lab("FOLDERS", 14, 224); lab("TAGS", 14, 526); lab("TYPE", 290, 82 - 0); lab("PREVIEW", 874, 104);
-        g.setColour(kDim); g.setFont(mono(12.f)); g.drawText(statusLine, 290, 192, 570, 18, juce::Justification::left);
-        g.setFont(mono(11.f)); const int ty = 208; g.drawText("NAME", 290 + colName, ty, 200, 16, juce::Justification::left); g.drawText("TYPE", 290 + colType, ty, 80, 16, juce::Justification::left); g.drawText("GENRE", 290 + colGenre, ty, 80, 16, juce::Justification::left);
-        g.drawText("BPM", 290 + colBpm, ty, 50, 16, juce::Justification::left); g.drawText("KEY", 290 + colKey, ty, 50, 16, juce::Justification::left); g.drawText("LENGTH", 290 + colLen, ty, 70, 16, juce::Justification::left); g.drawText("TAGS", 290 + colTags, ty, 80, 16, juce::Justification::left);
+        lab("IMPORT", 14, 88); lab("FOLDERS", 14, 224); lab("TAGS", 14, 526); lab("TYPE", cx0, 88);
+        g.setColour(kDim); g.setFont(mono(12.f)); g.drawText(statusLine, cx0, 192, 600, 18, juce::Justification::left);
+        g.setFont(mono(11.f)); const int ty = 208; g.drawText("NAME", cx0 + colName, ty, 200, 16, juce::Justification::left); g.drawText("TYPE", cx0 + colType, ty, 80, 16, juce::Justification::left); g.drawText("GENRE", cx0 + colGenre, ty, 80, 16, juce::Justification::left);
+        g.drawText("BPM", cx0 + colBpm, ty, 50, 16, juce::Justification::left); g.drawText("KEY", cx0 + colKey, ty, 50, 16, juce::Justification::left); g.drawText("LENGTH", cx0 + colLen, ty, 70, 16, juce::Justification::left); g.drawText("TAGS", cx0 + colTags, ty, 80, 16, juce::Justification::left);
         if (auto* s = selected())
         {
-            g.setColour(kGreen); g.setFont(mono(17.f, true)); g.drawText(String(s->name), 874, 104 + 0, 252, 0, juce::Justification::left);
-            g.setColour(kGreen); g.setFont(mono(15.f, true)); g.drawText(String(s->name), 874, 124 - 22 + 0, 252, 20, juce::Justification::left, true);
+            g.setColour(kGreen); g.setFont(mono(15.f, true)); g.drawText(String(s->name), 874, 100, 252, 22, juce::Justification::left, true);
             const auto st = proc.library.stemsOf(*s); g.setColour(kDim); g.setFont(sans(12.f)); juce::String t;
             if (st.empty()) t = "Stems: none found next to this file."; else { t = "Stems found: "; for (auto& x : st) t << x.kind << " "; }
             g.drawFittedText(t, 874, 560, 252, 48, juce::Justification::topLeft, 3);
