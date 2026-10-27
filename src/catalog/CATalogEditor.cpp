@@ -74,7 +74,7 @@ public:
 };
 
 // Drag this onto the DAW (or a file manager): starts an operating system file drag of the selected sample.
-class DragPad : public juce::Component
+class DragPad : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     std::function<juce::File()> fileToDrag;
@@ -108,7 +108,7 @@ public:
         for (auto* l : { &folderList, &tagList, &table }) { l->setColour(juce::ListBox::backgroundColourId, Colour(0xff0c0d10)); l->setColour(juce::ListBox::outlineColourId, kEdge); l->setOutlineThickness(1); }
         search.setTextToShowWhenEmpty("Search names, tags, type...", kDim); search.addListener(this); search.setColour(juce::TextEditor::backgroundColourId, Colour(0xff0c0d10));
         addTag.setTextToShowWhenEmpty("+ tag", kDim); addTag.setColour(juce::TextEditor::backgroundColourId, Colour(0xff0c0d10));
-        addTag.onReturn = [this] { if (auto* s = selected()) { catalog::Library::addTag(*s, addTag.getText().toStdString()); proc.saveMeta(); addTag.clear(); refresh(); } };
+        addTag.onReturnKey = [this] { if (auto* s = selected()) { catalog::Library::addTag(*s, addTag.getText().toStdString()); proc.saveMeta(); addTag.clear(); refresh(); } };
         sortBox.addItemList({ "Name", "BPM", "Key", "Rating", "Size" }, 1); sortBox.setSelectedId(1, juce::dontSendNotification);
         for (auto* cb : { &genreBox, &keyBox, &sortBox }) cb->onChange = [this] { refresh(); };
         favOnly.onClick = [this] { refresh(); };
