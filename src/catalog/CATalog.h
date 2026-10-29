@@ -6,6 +6,8 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "../core/Library.h"
 #include <memory>
+#include <array>
+#include <atomic>
 
 class CATalogProcessor : public juce::AudioProcessor
 {
@@ -14,7 +16,7 @@ public:
     ~CATalogProcessor() override;
     const juce::String getName() const override { return "CATalog"; }
     void prepareToPlay(double sampleRate, int maxBlock) override;
-    void releaseResources() override { transport.releaseResources(); }
+    void releaseResources() override { resampler.releaseResources(); transport.releaseResources(); }
     bool isBusesLayoutSupported(const BusesLayout& l) const override { return l.getMainOutputChannelSet() == juce::AudioChannelSet::stereo(); }
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     juce::AudioProcessorEditor* createEditor() override;
@@ -44,6 +46,16 @@ public:
     bool auditionPlaying() const { return transport.isPlaying(); }
     double auditionSeconds() const { return transport.getCurrentPosition(); }
     void replayAudition() { transport.setPosition(0.0); transport.start(); }
+    // preview controls (any thread). Pitch and tempo sync work like tape: speed and pitch move together.
+    void setPitchSemitones(float s) { pitchSt = s; }
+    void setVolumeDb(float d) { volDb = d; }
+    void setSync(bool b) { syncOn = b; }
+    void setHostBpm(double b) { hostBpm = (float) b; }
+    void setSampleBpm(double b) { sampleBpm = (float) b; }
+    double hostBpmSeen() const { return seenBpm.load(); }          // tempo reported by the host, 0 if none
+    float levelL() const { return peakL.load(); } float levelR() const { return peakR.load(); }
+    void copyRecent(float* dst, int n) const;                       // last n output samples (mono), for the spectrum
+    double currentRate() const { return rate.load(); }
     void saveMeta() const;
     catalog::Library library;
     juce::File libraryFolder, watchFolder; std::string watchSig;
@@ -51,6 +63,10 @@ public:
 private:
     juce::File metaFile() const; juce::File settingsFile() const; void loadSettings();
     bool loopAudition = false;
+    juce::ResamplingAudioSource resampler { &transport, false, 2 };
+    std::atomic<float> pitchSt { 0.f }, volDb { 0.f }, hostBpm { 128.f }, sampleBpm { 0.f }, peakL { 0.f }, peakR { 0.f }; std::atomic<bool> syncOn { false };
+    std::atomic<double> seenBpm { 0.0 }, rate { 1.0 };
+    static constexpr int ringSize = 4096; std::array<std::atomic<float>, ringSize> ring {}; std::atomic<int> ringPos { 0 };
     juce::AudioFormatManager formats; juce::AudioTransportSource transport; std::unique_ptr<juce::AudioFormatReaderSource> source;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CATalogProcessor)
 };

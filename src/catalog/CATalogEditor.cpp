@@ -1,7 +1,7 @@
-// CATalog window, built from docs/mockup/catalog.html: header, import bar, folder and tag lists, type chips, search and filters,
-// the sample table, and the preview panel (waveform, play, loop, type, tags, favourite, rating, drag to the DAW).
-// Fixed aspect ratio, resizable from every corner and edge, wood cheeks.
-// Not built yet (see ROADMAP): the Stems and Splice tabs, spectrum, pitch / volume / BPM sync preview, send to SupurrSaw, presets.
+// CATalog window, built from docs/mockup/catalog.html: header, three tabs (Library, Stems, Splice), folder and tag lists, type chips, search
+// and filters, the sample table, and the preview panel (waveform, spectrum, play, loop, auto-play, pitch, volume, tempo sync, level meter,
+// type, tags, favourite, rating, drag to the DAW). Fixed aspect ratio, resizable from every corner and edge, wood cheeks.
+// Not built yet (see ROADMAP): send to SupurrSaw, saved searches (the preset bar), the Settings button, Add files.
 #include "CATalog.h"
 #include <catui/CatLookAndFeel.h>
 #include <catui/RenderGate.h>
@@ -9,11 +9,13 @@
 #include <cmath>
 #include <map>
 #include <set>
+#include <array>
+#include <juce_dsp/juce_dsp.h>
 
 namespace {
 using juce::Colour; using juce::Graphics; using juce::String;
 const Colour kBg(0xff101114), kPanel(0xff15161a), kEdge(0xff2c2e35), kText(0xffe8e6e1), kDim(0xff8c909a), kGold(0xffffd100), kGreen(0xff5fe08c);
-constexpr int kCheek = 30, kContentW = 1140, kBaseW = kContentW + 2 * kCheek, kBaseH = 760;
+constexpr int kCheek = 30, kContentW = 1140, kBaseW = kContentW + 2 * kCheek, kBaseH = 780, kBodyY = 40;
 juce::Font mono(float h, bool bold = false) { return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), h, bold ? juce::Font::bold : juce::Font::plain)); }
 juce::Font sans(float h, bool bold = false) { return juce::Font(juce::FontOptions(h, bold ? juce::Font::bold : juce::Font::plain)); }
 
@@ -91,13 +93,142 @@ public:
     }
 };
 
+// Spectrum of what is playing: last 2048 output samples, log frequency axis, dB scale.
+class SpectrumView : public juce::Component, public juce::SettableTooltipClient
+{
+public:
+    std::function<void(float*, int)> source;
+    void tickUpdate()
+    {
+        if (!source) return; std::array<float, 2048> in {}; source(in.data(), 2048);
+        std::array<float, 4096> buf {}; for (int i = 0; i < 2048; ++i) buf[(size_t) i] = in[(size_t) i];
+        win.multiplyWithWindowingTable(buf.data(), 2048); fft.performFrequencyOnlyForwardTransform(buf.data());
+        const double nyq = fs * 0.5; mags.assign((size_t) std::max(1, getWidth()), -100.f);
+        for (int x = 0; x < getWidth(); ++x)
+        {
+            const double f0 = 30.0 * std::pow(16000.0 / 30.0, (double) x / std::max(1, getWidth())), f1 = 30.0 * std::pow(16000.0 / 30.0, (double) (x + 1) / std::max(1, getWidth()));
+            const int b0 = juce::jlimit(1, 1023, (int) (f0 / nyq * 1024.0)), b1 = juce::jlimit(b0, 1023, (int) (f1 / nyq * 1024.0)); float m = 0.f;
+            for (int b = b0; b <= b1; ++b) m = std::max(m, buf[(size_t) b]);
+            mags[(size_t) x] = juce::Decibels::gainToDecibels(m / 512.f, -100.f);
+        }
+        repaint();
+    }
+    void paint(Graphics& g) override
+    {
+        g.fillAll(Colour(0xff060608)); g.setColour(kEdge); g.drawRect(getLocalBounds(), 1);
+        auto db2y = [this](float db) { return (float) getHeight() - 14.f - juce::jlimit(0.f, 1.f, (db + 80.f) / 80.f) * ((float) getHeight() - 18.f); };
+        g.setFont(mono(9.f)); for (float db : { -20.f, -40.f, -60.f }) { g.setColour(Colour(0xff1c1d22)); g.drawHorizontalLine((int) db2y(db), 1.f, (float) getWidth()); g.setColour(kDim); g.drawText(String((int) db), 3, (int) db2y(db) - 5, 24, 10, juce::Justification::left); }
+        for (double f : { 100.0, 1000.0, 10000.0 }) { const float x = (float) (std::log(f / 30.0) / std::log(16000.0 / 30.0)) * (float) getWidth(); g.setColour(Colour(0xff1c1d22)); g.drawVerticalLine((int) x, 1.f, (float) getHeight() - 14.f); g.setColour(kDim); g.drawText(f >= 1000 ? String((int) (f / 1000)) + "k" : String((int) f), (int) x - 12, getHeight() - 13, 24, 11, juce::Justification::centred); }
+        if (mags.empty()) return; juce::Path p; p.startNewSubPath(0.f, db2y(-80.f));
+        for (size_t x = 0; x < mags.size(); ++x) p.lineTo((float) x, db2y(mags[x])); p.lineTo((float) mags.size(), db2y(-80.f)); p.closeSubPath();
+        g.setColour(kGreen.withAlpha(0.35f)); g.fillPath(p); g.setColour(kGreen); g.strokePath(p, juce::PathStrokeType(1.f));
+    }
+    double fs = 44100.0;
+private:
+    juce::dsp::FFT fft { 11 }; juce::dsp::WindowingFunction<float> win { 2048, juce::dsp::WindowingFunction<float>::hann }; std::vector<float> mags;
+};
+
+class LevelView : public juce::Component, public juce::SettableTooltipClient
+{
+public:
+    float l = 0.f, r = 0.f;
+    void paint(Graphics& g) override
+    {
+        g.fillAll(Colour(0xff060608)); g.setColour(kEdge); g.drawRect(getLocalBounds(), 1);
+        auto bar = [&](int y, float v) { const float db = juce::Decibels::gainToDecibels(v, -60.f); const float w = juce::jlimit(0.f, 1.f, (db + 60.f) / 60.f) * (float) (getWidth() - 24);
+            g.setColour(Colour(0xff15161a)); g.fillRect(4, y, getWidth() - 24, 8); g.setColour(db > -3.f ? Colour(0xffff6b6b) : (db > -12.f ? kGold : kGreen)); g.fillRect(4.f, (float) y, w, 8.f); };
+        bar(5, l); bar(17, r); g.setColour(kDim); g.setFont(mono(9.f)); g.drawText("L", getWidth() - 14, 3, 10, 10, juce::Justification::right); g.drawText("R", getWidth() - 14, 15, 10, 10, juce::Justification::right);
+    }
+};
+
+// Stems tab: the stem files found next to the selected loop. A found stem plays when you click its card.
+class StemsPane : public juce::Component
+{
+public:
+    struct Found { String kind, file, rel; };
+    std::function<void(const String&)> onPlay; String title; std::vector<Found> found;
+    void paint(Graphics& g) override
+    {
+        g.setColour(kPanel); g.fillRoundedRectangle(getLocalBounds().toFloat(), 4.f); g.setColour(kEdge); g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(0.5f), 4.f, 1.f);
+        g.setColour(kGreen); g.setFont(sans(16.f, true)); g.drawText("STEMS" + (title.isEmpty() ? String() : "  |  " + title.toUpperCase()), 18, 14, getWidth() - 36, 22, juce::Justification::left, true);
+        const String how = "CATalog looks in the same folder for files named like Loop_drums, Loop_bass, Loop_vocals, Loop_other (also \"Loop - drums\" or \"Loop (drums)\"), or in a folder called \"Loop stems\". It does not split audio into stems itself: put the stem files beside the loop, or export them from your stem splitter and import that folder.";
+        String head = title.isEmpty() ? "Select a sample in the Library tab." : (found.empty() ? "No stem files found next to this sample." : String((int) found.size()) + " stem file(s) found next to this sample. Click a card to play it.");
+        g.setColour(kText); g.setFont(sans(14.f, true)); g.drawFittedText(head, 18, 46, getWidth() - 36, 20, juce::Justification::left, 1);
+        g.setFont(sans(13.f)); g.setColour(kDim); g.drawFittedText(how, 18, 72, getWidth() - 36, 62, juce::Justification::topLeft, 4);
+        rects.clear(); std::vector<String> kinds { "drums", "bass", "vocals", "other" }; for (auto& f : found) if (std::find(kinds.begin(), kinds.end(), f.kind) == kinds.end()) kinds.push_back(f.kind);
+        const int cw = (getWidth() - 36 - 3 * 10) / 4; int i = 0;
+        for (auto& k : kinds)
+        {
+            const Found* hit = nullptr; for (auto& f : found) if (f.kind == k) { hit = &f; break; }
+            juce::Rectangle<int> r(18 + (i % 4) * (cw + 10), 150 + (i / 4) * 70, cw, 58); ++i; rects.push_back({ r, hit ? hit->rel : String() });
+            g.setColour(hit ? kGreen.withAlpha(0.12f) : Colour(0xff121317)); g.fillRoundedRectangle(r.toFloat(), 3.f); g.setColour(hit ? kGreen : kEdge); g.drawRoundedRectangle(r.toFloat().reduced(0.5f), 3.f, 1.f);
+            g.setColour(hit ? kGreen : kDim); g.setFont(sans(13.f, true)); g.drawText(k.toUpperCase(), r.withHeight(28), juce::Justification::centred);
+            g.setColour(hit ? kText : kDim.withAlpha(0.7f)); g.setFont(sans(12.f)); g.drawText(hit ? hit->file : String("missing"), r.withTrimmedTop(26).reduced(6, 0), juce::Justification::centred, true);
+        }
+    }
+    void mouseUp(const juce::MouseEvent& e) override { for (auto& r : rects) if (r.second.isNotEmpty() && r.first.contains(e.getPosition()) && onPlay) { onPlay(r.second); return; } }
+private:
+    std::vector<std::pair<juce::Rectangle<int>, String>> rects;
+};
+
+// Splice tab: no login on purpose. Choose the folder Splice saves into; CATalog watches it and imports new files.
+class SplicePane : public juce::Component
+{
+public:
+    Pill openB { "Open Splice" }, chooseB { "Choose Splice save folder" }, checkB { "Check now" };
+    String status; std::vector<String> names;
+    SplicePane() { addAndMakeVisible(openB); addAndMakeVisible(chooseB); addAndMakeVisible(checkB); }
+    void resized() override { openB.setBounds(18, 188, 120, 34); chooseB.setBounds(146, 188, 230, 34); checkB.setBounds(384, 188, 120, 34); }
+    void paint(Graphics& g) override
+    {
+        g.setColour(kPanel); g.fillRoundedRectangle(getLocalBounds().toFloat(), 4.f); g.setColour(kEdge); g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(0.5f), 4.f, 1.f);
+        g.setColour(kGreen); g.setFont(sans(16.f, true)); g.drawText("SPLICE", 18, 14, 300, 22, juce::Justification::left);
+        g.setColour(kText); g.setFont(sans(14.f, true)); g.drawFittedText("No login here, on purpose.", 18, 44, getWidth() - 36, 20, juce::Justification::left, 1);
+        g.setFont(sans(13.f)); g.setColour(kDim);
+        g.drawFittedText("Splice has no public API for other apps, so CATalog cannot sign in to your account or browse its catalogue. You search and download in the Splice app or on splice.com; CATalog picks the files up from the folder Splice saves into.", 18, 66, getWidth() - 36, 50, juce::Justification::topLeft, 3);
+        g.setColour(kText); g.drawFittedText("1. Open Splice and sign in there.\n2. Choose the folder Splice saves its downloads into (see the download location in the Splice app's settings).\n3. Choosing it starts watching: new files appear in the Library under that folder, analysed and sorted. The app and plugin watch while they are open and remember the folder.", 18, 112, getWidth() - 36, 70, juce::Justification::topLeft, 6);
+        g.setColour(status.startsWith("Watching") ? kGreen : kDim); g.setFont(mono(12.f)); g.drawFittedText(status, 18, 232, getWidth() - 36, 18, juce::Justification::left, 1);
+        g.setColour(kGreen); g.setFont(sans(13.f, true)); g.drawText("IMPORTED FROM THIS FOLDER", 18, 264, 300, 18, juce::Justification::left);
+        g.setColour(Colour(0xff0c0d10)); g.fillRect(18, 288, getWidth() - 36, getHeight() - 306); g.setColour(kEdge); g.drawRect(18, 288, getWidth() - 36, getHeight() - 306, 1);
+        g.setColour(kDim); g.setFont(sans(13.f)); const int rowsFit = (getHeight() - 306 - 8) / 20;
+        if (names.empty()) g.drawText("Nothing imported yet.", 28, 292, getWidth() - 56, 20, juce::Justification::left);
+        for (int i = 0; i < (int) names.size() && i < rowsFit; ++i) g.drawText(names[(size_t) i], 28, 292 + i * 20, getWidth() - 56, 20, juce::Justification::left, true);
+        if ((int) names.size() > rowsFit) g.drawText("... and " + String((int) names.size() - rowsFit) + " more", 28, 292 + (rowsFit - 1) * 20, getWidth() - 56, 20, juce::Justification::left);
+    }
+};
+
+
 class CATalogEditor : public juce::AudioProcessorEditor, private juce::ListBoxModel, private juce::TextEditor::Listener
 {
 public:
     explicit CATalogEditor(CATalogProcessor& p) : AudioProcessorEditor(p), proc(p), gate(*this)
     {
-        setLookAndFeel(&laf); auto& c = content; addAndMakeVisible(c);
-        for (auto* b : { &guide, &about, &importB, &watchB, &spliceB, &playB, &loopB, &favB }) c.addAndMakeVisible(*b);
+        setLookAndFeel(&laf); addAndMakeVisible(content); content.addAndMakeVisible(body); auto& c = body;
+        for (auto* b : { &guide, &about }) content.addAndMakeVisible(*b);
+        const char* tn[] = { "Library", "Stems", "Splice" };
+        for (int i = 0; i < 3; ++i) { tabs[i] = std::make_unique<Pill>(tn[i]); content.addAndMakeVisible(*tabs[i]); tabs[i]->setRadioGroupId(11); tabs[i]->setClickingTogglesState(true); tabs[i]->onClick = [this, i] { setTab(i); }; }
+        tabs[0]->setToggleState(true, juce::dontSendNotification);
+        for (auto* b : { &importB, &playB, &loopB, &autoB, &syncB, &favB }) c.addAndMakeVisible(*b);
+        for (auto* s : { &pitchS, &volS, &bpmS }) { c.addAndMakeVisible(*s); s->setSliderStyle(juce::Slider::RotaryVerticalDrag); s->setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0); }
+        c.addAndMakeVisible(spectrum); c.addAndMakeVisible(level); c.addAndMakeVisible(stemsPane); c.addAndMakeVisible(splicePane);
+        spectrum.source = [this](float* d, int n) { proc.copyRecent(d, n); }; spectrum.setTooltip("What is playing right now: frequency from 30 Hz to 16 kHz, level in dB.");
+        level.setTooltip("Output level, left and right.");
+        pitchS.setRange(-12.0, 12.0, 1.0); pitchS.setValue(0.0); pitchS.setDoubleClickReturnValue(true, 0.0); pitchS.setTooltip("Pitch in semitones. Like tape: the sample also gets faster or slower.");
+        volS.setRange(-24.0, 6.0, 0.1); volS.setValue(0.0); volS.setDoubleClickReturnValue(true, 0.0); volS.setTooltip("Preview volume in dB. Only for listening: it does not change the file you drag out.");
+        bpmS.setRange(60.0, 200.0, 0.1); bpmS.setValue(128.0); bpmS.setDoubleClickReturnValue(true, 128.0); bpmS.setTooltip("Tempo to sync to. Follows the host tempo (plugin) until you turn this knob; double click to reset.");
+        pitchS.onValueChange = [this] { proc.setPitchSemitones((float) pitchS.getValue()); body.repaint(); };
+        volS.onValueChange = [this] { proc.setVolumeDb((float) volS.getValue()); body.repaint(); };
+        bpmS.onValueChange = [this] { proc.setHostBpm(bpmS.getValue()); if (!settingBpmFromHost) bpmTouched = true; body.repaint(); };
+        syncB.setClickingTogglesState(true); autoB.setClickingTogglesState(true); autoB.setToggleState(true, juce::dontSendNotification);
+        syncB.setTooltip("Play the sample at the tempo on the knob (needs a BPM on the sample). Speed and pitch move together.");
+        autoB.setTooltip("Play a sample as soon as you select it.");
+        syncB.onClick = [this] { proc.setSync(syncB.getToggleState()); body.repaint(); };
+        stemsPane.onPlay = [this](const String& rel) { if (auto* s = proc.library.byRel(rel.toStdString())) { proc.setSampleBpm(s->bpm); proc.audition(*s); } };
+        splicePane.openB.onClick = [this] { proc.openSplice(); };
+        splicePane.chooseB.onClick = [this] { pick("Pick the folder Splice saves into", [this](const juce::File& f) { proc.setWatchFolder(f); proc.analysePending(); refresh(); }); };
+        splicePane.checkB.onClick = [this] { proc.pollWatch(); proc.analysePending(); refresh(); };
+        splicePane.openB.setTooltip("Opens the Splice app (or splice.com). You sign in and download there."); splicePane.chooseB.setTooltip("Choose the folder Splice saves your downloads into. CATalog watches it and picks up new files. There is no Splice login here: Splice has no public API.");
+        splicePane.checkB.setTooltip("Look at the folder now instead of waiting for the next automatic check.");
         for (auto* l : { &folderList, &tagList, &table }) c.addAndMakeVisible(*l);
         for (auto* x : { &search }) c.addAndMakeVisible(*x);
         for (auto* cb : { &genreBox, &keyBox, &sortBox, &typeBox }) c.addAndMakeVisible(*cb);
@@ -116,14 +247,10 @@ public:
         typeBox.setTooltip("Fix the type of the selected sample. Your choice is kept in the library file and wins over the guess.");
         typeBox.onChange = [this] { if (auto* s = selected()) { catalog::Library::setType(*s, typeBox.getSelectedId() > 1 ? typeBox.getText().toStdString() : std::string()); proc.saveMeta(); juce::MessageManager::callAsync([sp = juce::Component::SafePointer<CATalogEditor>(this)] { if (sp != nullptr) sp->refresh(); }); } };
         importB.setTooltip("Adds a folder and everything in its subfolders. You can add as many as you like.");
-        watchB.setTooltip("Choose the folder Splice saves your downloads into. CATalog watches it and picks up new files. There is no Splice login here: Splice has no public API.");
-        spliceB.setTooltip("Opens the Splice app (or splice.com). You sign in and download there.");
         playB.setTooltip("Play the selected sample from the start."); loopB.setTooltip("Repeat the sample while it plays.");
         favB.setTooltip("Mark as favourite (double click a row does the same)."); dragPad.setTooltip("Drag the selected sample onto a track in your DAW.");
         importB.onClick = [this] { pick("Pick a sample folder (subfolders are included)", [this](const juce::File& f) { proc.importFolder(f); proc.analysePending(); refresh(); }); };
-        watchB.onClick = [this] { pick("Pick the folder Splice saves into", [this](const juce::File& f) { proc.setWatchFolder(f); proc.analysePending(); refresh(); }); };
-        spliceB.onClick = [this] { proc.openSplice(); };
-        playB.onClick = [this] { if (auto* s = selected()) proc.audition(*s); };
+        playB.onClick = [this] { if (auto* s = selected()) { proc.setSampleBpm(s->bpm); proc.audition(*s); } };
         loopB.onClick = [this] { proc.setAuditionLoop(loopB.getToggleState()); };
         favB.onClick = [this] { if (auto* s = selected()) { s->fav = !s->fav; proc.saveMeta(); refresh(); } };
         guide.onClick = [] { juce::URL("https://github.com/SpeakingColors/CATalog/blob/main/docs/CATalog-manual.pdf").launchInDefaultBrowser(); };
@@ -133,11 +260,11 @@ public:
         dragPad.fileToDrag = [this] { auto* s = selected(); return s ? juce::File(String(s->path)) : juce::File(); };
         constrainer.setFixedAspectRatio((double) kBaseW / kBaseH); constrainer.setSizeLimits(kBaseW / 2, kBaseH / 2, kBaseW * 2, kBaseH * 2);
         setConstrainer(&constrainer); setResizable(true, true); setSize(kBaseW, kBaseH);
-        gate.onFrame = [this] { tick(); }; gate.start(10);
+        gate.onFrame = [this] { tick(); }; gate.start(20);
         if (const char* f = std::getenv("CAT_TOUR_LOAD"))   // documentation tool for the screenshots, never set for users
             juce::Timer::callAfterDelay(1200, [sp = juce::Component::SafePointer<CATalogEditor>(this), path = String(f)] {
                 if (sp == nullptr) return; sp->proc.importFolder(juce::File(path)); while (sp->proc.analysePending(200) > 0) {} sp->refresh(); sp->table.selectRow(std::min(2, std::max(0, (int) sp->rows.size() - 1))); });
-        refresh();
+        refresh(); setTab(0);
     }
     ~CATalogEditor() override { setLookAndFeel(nullptr); }
     void paint(Graphics& g) override { g.fillAll(kBg); catui::drawWoodCheeks(g, getLocalBounds(), juce::roundToInt(kCheek * scale())); }
@@ -166,7 +293,7 @@ public:
     void listBoxItemDoubleClicked(int row, const juce::MouseEvent&) override { if (row >= 0 && row < (int) rows.size()) { auto* s = proc.library.byRel(rows[(size_t) row]->rel); if (s) { s->fav = !s->fav; proc.saveMeta(); refresh(); } } }
     void selectedRowsChanged(int row) override
     {
-        if (row < 0 || row >= (int) rows.size()) return; selRel = rows[(size_t) row]->rel; proc.audition(*rows[(size_t) row]); loadWave(*rows[(size_t) row]); updateSelection(); content.repaint();
+        if (row < 0 || row >= (int) rows.size()) return; selRel = rows[(size_t) row]->rel; proc.setSampleBpm(rows[(size_t) row]->bpm); if (autoB.getToggleState()) proc.audition(*rows[(size_t) row]); loadWave(*rows[(size_t) row]); updateSelection(); updatePanes(); content.repaint();
     }
     void textEditorTextChanged(juce::TextEditor&) override { refresh(); }
 
@@ -193,7 +320,9 @@ private:
 
     CATalogProcessor& proc; catui::CatLookAndFeel laf; juce::ComponentBoundsConstrainer constrainer; catui::RenderGate gate;
     struct Content : juce::Component { CATalogEditor& o; explicit Content(CATalogEditor& e) : o(e) {} void paint(Graphics& g) override { o.paintContent(g); } } content { *this };
-    Pill guide { "Guide" }, about { "About & Support" }, importB { "Import folder" }, watchB { "Splice save folder" }, spliceB { "Open Splice" }, playB { "Play" }, loopB { "Loop" }, favB { "Favourite" }, favOnly { "Favourites" };
+    Pill guide { "Guide" }, about { "About & Support" }, importB { "Import folder" }, playB { "Play" }, loopB { "Loop" }, autoB { "Auto-play" }, syncB { "Sync" }, favB { "Favourite" }, favOnly { "Favourites" };
+    std::unique_ptr<Pill> tabs[3]; int tab = 0; juce::Slider pitchS, volS, bpmS; bool bpmTouched = false, settingBpmFromHost = false; SpectrumView spectrum; LevelView level; StemsPane stemsPane; SplicePane splicePane;
+    struct Body : juce::Component { CATalogEditor& o; explicit Body(CATalogEditor& e) : o(e) {} void paint(Graphics& g) override { o.paintBody(g); } } body { *this };
     juce::ListBox folderList, tagList, table; ListModel folderModel, tagModel; juce::TextEditor search, addTag; juce::ComboBox genreBox, keyBox, sortBox, typeBox;
     ChipBar typeChips, selTags; WaveView wave; DragPad dragPad;
     std::vector<const catalog::Sample*> rows; std::vector<Item> folderItems, tagItems; std::set<std::string> tagSel; String folderSel, typeFilter, selRel, statusLine;
@@ -210,19 +339,41 @@ private:
     void layout()
     {
         guide.setBounds(900, 20, 90, 34); about.setBounds(1000, 20, 130, 34);
+        for (int i = 0; i < 3; ++i) tabs[i]->setBounds(14 + i * 372, 90, 368, 32);
+        body.setBounds(0, kBodyY, kContentW, kBaseH - kBodyY);
         const int lx = 14, lw = 230, cx = cx0, cw = 600, rx = 874, rw = 252;
-        importB.setBounds(lx, 106, lw, 34); watchB.setBounds(lx, 146, lw, 30); spliceB.setBounds(lx, 182, lw, 30);
-        folderList.setBounds(lx, 244, lw, 270); tagList.setBounds(lx, 546, lw, 160);
+        importB.setBounds(lx, 106, lw, 34);
+        folderList.setBounds(lx, 170, lw, 344); tagList.setBounds(lx, 546, lw, 160);
         typeChips.setBounds(cx, 106, cw, 50); search.setBounds(cx, 160, 200, 28); genreBox.setBounds(cx + 208, 160, 110, 28); keyBox.setBounds(cx + 324, 160, 80, 28); sortBox.setBounds(cx + 410, 160, 90, 28); favOnly.setBounds(cx + 506, 160, 94, 28);
         table.setBounds(cx, 226, cw, 480);
-        wave.setBounds(rx, 128, rw, 90); playB.setBounds(rx, 226, 80, 32); loopB.setBounds(rx + 88, 226, 70, 32);
-        typeBox.setBounds(rx, 268, 160, 28); selTags.setBounds(rx, 340, rw, 70); addTag.setBounds(rx, 416, 100, 24);
-        favB.setBounds(rx, 450, 120, 32); dragPad.setBounds(rx, 500, rw, 44);
+        stemsPane.setBounds(cx, 92, cw, 614); splicePane.setBounds(cx, 92, cw, 614);
+        wave.setBounds(rx, 128, rw, 90); playB.setBounds(rx, 226, 72, 30); loopB.setBounds(rx + 78, 226, 64, 30); autoB.setBounds(rx + 148, 226, 104, 30);
+        spectrum.setBounds(rx, 262, rw, 62);
+        pitchS.setBounds(rx, 332, 44, 44); volS.setBounds(rx + 126, 332, 44, 44); bpmS.setBounds(rx, 384, 44, 44); syncB.setBounds(rx + 126, 392, 80, 30);
+        typeBox.setBounds(rx, 436, 160, 28); selTags.setBounds(rx, 506, rw, 52); addTag.setBounds(rx, 562, 100, 24);
+        favB.setBounds(rx, 594, 120, 30); dragPad.setBounds(rx, 632, rw, 40); level.setBounds(rx, 708, rw, 28);
+    }
+    void setTab(int t)
+    {
+        tab = t; const bool lib = t == 0;
+        for (auto* x : std::initializer_list<juce::Component*> { &typeChips, &search, &genreBox, &keyBox, &sortBox, &favOnly, &table }) x->setVisible(lib);
+        stemsPane.setVisible(t == 1); splicePane.setVisible(t == 2); updatePanes(); body.repaint();
+    }
+    void updatePanes()
+    {
+        auto* s = selected(); stemsPane.title = s ? String(s->name) : String(); stemsPane.found.clear();
+        if (s) for (auto& st : proc.library.stemsOf(*s)) { auto* o = proc.library.byRel(st.rel); stemsPane.found.push_back({ String(st.kind), o ? juce::File(String(o->path)).getFileName() : String(st.rel), String(st.rel) }); }
+        stemsPane.repaint();
+        splicePane.status = proc.watchFolder.isDirectory() ? "Watching: " + proc.watchFolder.getFullPathName() : String("No Splice save folder chosen yet.");
+        splicePane.names.clear(); if (proc.watchFolder.isDirectory()) { const auto wf = proc.watchFolder.getFullPathName().toStdString(); for (auto& sm : proc.library.samples) if (sm.path.compare(0, wf.size(), wf) == 0) splicePane.names.push_back(String(sm.rel)); std::sort(splicePane.names.begin(), splicePane.names.end()); }
+        splicePane.repaint();
     }
     void tick()
     {
         bool changed = proc.pollWatch(); if (proc.analysePending(6) > 0) changed = true; if (changed) refresh();
         const double pos = proc.auditionPlaying() ? proc.auditionSeconds() : -1.0; if (pos != wave.pos) { wave.pos = pos; wave.repaint(); }
+        if (!bpmTouched && proc.hostBpmSeen() >= 40.0 && std::fabs(bpmS.getValue() - proc.hostBpmSeen()) > 0.05) { settingBpmFromHost = true; bpmS.setValue(proc.hostBpmSeen(), juce::sendNotificationSync); settingBpmFromHost = false; }
+        level.l = proc.levelL(); level.r = proc.levelR(); level.repaint(); const double fsr = proc.getSampleRate(); spectrum.fs = fsr > 0 ? fsr : 44100.0; spectrum.tickUpdate();
     }
     void loadWave(const catalog::Sample& s)
     {
@@ -262,7 +413,7 @@ private:
         rows = L.find(q); table.updateContent(); table.repaint(); updateSelection();
         int pend = 0; for (auto& s : L.samples) if (!s.analysed) ++pend;
         statusLine = String((int) rows.size()) + " of " + String((int) L.samples.size()) + " samples in " + String((int) L.roots.size()) + " folder(s)." + (pend ? "  Analysing " + String(pend) + " more..." : String());
-        content.repaint();
+        updatePanes(); content.repaint();
     }
     void paintContent(Graphics& g)
     {
@@ -271,27 +422,38 @@ private:
         g.setColour(kText); g.setFont(sans(34.f, true)); g.drawText("CATALOG", 96, 8, 400, 46, juce::Justification::left);
         g.setColour(kGold); g.setFont(sans(14.f, true)); g.drawText("STUDIO 87", 98, 52, 200, 20, juce::Justification::left);
         g.setColour(kEdge); g.drawHorizontalLine(84, 14.f, 1126.f);
+    }
+    void paintBody(Graphics& g)
+    {
         auto lab = [&](const String& t, int x, int y) { g.setColour(kDim); g.setFont(sans(12.f, true)); g.drawText(t, x, y, 260, 16, juce::Justification::left); };
-        lab("IMPORT", 14, 88); lab("FOLDERS", 14, 224); lab("TAGS", 14, 526); lab("TYPE", cx0, 88);
-        g.setColour(kDim); g.setFont(mono(12.f)); g.drawText(statusLine, cx0, 192, 600, 18, juce::Justification::left);
-        g.setFont(mono(11.f)); const int ty = 208; g.drawText("NAME", cx0 + colName, ty, 200, 16, juce::Justification::left); g.drawText("TYPE", cx0 + colType, ty, 80, 16, juce::Justification::left); g.drawText("GENRE", cx0 + colGenre, ty, 80, 16, juce::Justification::left);
-        g.drawText("BPM", cx0 + colBpm, ty, 50, 16, juce::Justification::left); g.drawText("KEY", cx0 + colKey, ty, 50, 16, juce::Justification::left); g.drawText("LENGTH", cx0 + colLen, ty, 70, 16, juce::Justification::left); g.drawText("TAGS", cx0 + colTags, ty, 80, 16, juce::Justification::left);
+        lab("IMPORT", 14, 88); lab("FOLDERS", 14, 150); lab("TAGS", 14, 526);
+        if (tab == 0)
+        {
+            lab("TYPE", cx0, 88);
+            g.setColour(kDim); g.setFont(mono(12.f)); g.drawText(statusLine, cx0, 192, 600, 18, juce::Justification::left);
+            g.setFont(mono(11.f)); const int ty = 208; g.drawText("NAME", cx0 + colName, ty, 200, 16, juce::Justification::left); g.drawText("TYPE", cx0 + colType, ty, 80, 16, juce::Justification::left); g.drawText("GENRE", cx0 + colGenre, ty, 80, 16, juce::Justification::left);
+            g.drawText("BPM", cx0 + colBpm, ty, 50, 16, juce::Justification::left); g.drawText("KEY", cx0 + colKey, ty, 50, 16, juce::Justification::left); g.drawText("LENGTH", cx0 + colLen, ty, 70, 16, juce::Justification::left); g.drawText("TAGS", cx0 + colTags, ty, 80, 16, juce::Justification::left);
+        }
+        lab("PREVIEW", 874, 88);
+        auto cap = [&](int x, int y, const String& name, const String& val) { g.setColour(kDim); g.setFont(sans(11.f, true)); g.drawText(name, x, y + 4, 80, 14, juce::Justification::left); g.setColour(kGreen); g.setFont(mono(13.f)); g.drawText(val, x, y + 20, 80, 16, juce::Justification::left); };
+        cap(874 + 50, 332, "PITCH", String(juce::roundToInt(pitchS.getValue())) + " st"); cap(874 + 126 + 50, 332, "VOLUME", String(volS.getValue(), 1) + " dB"); cap(874 + 50, 384, "TEMPO", String(bpmS.getValue(), 1));
+        { auto* sm = selected(); const String note = !syncB.getToggleState() ? String() : (sm && sm->bpm > 0 ? "speed x" + String(proc.currentRate(), 2) : String("no BPM on this sample")); g.setColour(kDim); g.setFont(sans(11.f)); g.drawText(note, 874 + 126, 424, 126, 12, juce::Justification::left); }
         if (auto* s = selected())
         {
-            g.setColour(kGreen); g.setFont(mono(15.f, true)); g.drawText(String(s->name), 874, 100, 252, 22, juce::Justification::left, true);
+            g.setColour(kGreen); g.setFont(mono(15.f, true)); g.drawText(String(s->name), 874, 104, 252, 20, juce::Justification::left, true);
             const auto st = proc.library.stemsOf(*s); g.setColour(kDim); g.setFont(sans(12.f)); juce::String t;
-            if (st.empty()) t = "Stems: none found next to this file."; else { t = "Stems found: "; for (auto& x : st) t << x.kind << " "; }
-            g.drawFittedText(t, 874, 560, 252, 48, juce::Justification::topLeft, 3);
-            g.drawText("TYPE: " + (s->type.empty() ? String("unknown") : String(s->type)) + (s->typeSrc.empty() ? String() : " (from " + String(s->typeSrc) + ")"), 874 + 0, 300, 252, 18, juce::Justification::left);
-            lab("TAGS ON THIS SAMPLE", 874, 320);
-            g.setColour(kGold); g.setFont(sans(18.f)); const int stars = s->rating; for (int i = 0; i < 5; ++i) g.setColour(i < stars ? kGold : kEdge), g.drawText("*", 874 + 140 + i * 20, 454, 20, 24, juce::Justification::centred);
+            if (st.empty()) t = "Stems: none found next to this file."; else { t = "Stems found: "; for (auto& x : st) t << x.kind << " "; t << "(Stems tab)"; }
+            g.drawFittedText(t, 874, 676, 252, 28, juce::Justification::topLeft, 2);
+            g.drawText("TYPE: " + (s->type.empty() ? String("unknown") : String(s->type)) + (s->typeSrc.empty() ? String() : " (from " + String(s->typeSrc) + ")"), 874, 466, 252, 18, juce::Justification::left);
+            lab("TAGS ON THIS SAMPLE", 874, 488);
+            for (int i = 0; i < 5; ++i) { juce::Path sp; sp.addStar({ (float) (874 + 138 + i * 22 + 10), 609.f }, 5, 4.f, 9.f); if (i < s->rating) { g.setColour(kGold); g.fillPath(sp); } else { g.setColour(kEdge); g.strokePath(sp, juce::PathStrokeType(1.f)); } }
         }
-        g.setColour(kDim); g.setFont(mono(11.f)); g.drawText("STUDIO 87 | CATALOG | hover a control for help", 14, 736, 700, 16, juce::Justification::left);
+        g.setColour(kDim); g.setFont(mono(11.f)); g.drawText("STUDIO 87 | CATALOG | hover a control for help", 14, 722, 700, 16, juce::Justification::left);
     }
     void mouseUp(const juce::MouseEvent& e) override
     {
-        const auto p = e.getEventRelativeTo(&content).getPosition(); auto* s = selected();
-        if (s && p.y > 450 && p.y < 480 && p.x > 1014 && p.x < 1126) { const int r = (p.x - 1014) / 20 + 1; s->rating = (s->rating == r) ? 0 : r; proc.saveMeta(); refresh(); }
+        const auto p = e.getEventRelativeTo(&body).getPosition(); auto* s = selected();
+        if (s && p.y > 594 && p.y < 624 && p.x >= 874 + 138 && p.x < 874 + 138 + 110) { const int r = (p.x - (874 + 138)) / 22 + 1; s->rating = (s->rating == r) ? 0 : r; proc.saveMeta(); refresh(); }
     }
 };
 }

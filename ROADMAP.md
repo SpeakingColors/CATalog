@@ -12,7 +12,8 @@ Sample manager.
 - [ ] Try it on a real sample folder; tune the name guesses
 - [ ] Tune type, BPM and key analysis on real sample libraries
 - [x] cat-ui editor v1 (library, filters, preview, drag to the DAW)
-- [ ] editor: Stems and Splice tabs, spectrum, pitch and sync preview, send to SupurrSaw (as in the mockup)
+- [x] editor: Stems and Splice tabs, spectrum, level, pitch, volume and tempo sync preview (built, not heard yet)
+- [ ] editor: send to SupurrSaw, saved searches (preset bar), Settings, Add files
 - [ ] Drag a sample out to the DAW
 - [ ] Waveform library shared with SupurrSaw (single-cycle WAVs)
 

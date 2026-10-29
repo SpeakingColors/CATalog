@@ -8,13 +8,31 @@ CATalogProcessor::CATalogProcessor()
 }
 CATalogProcessor::~CATalogProcessor() { transport.setSource(nullptr); }
 
-void CATalogProcessor::prepareToPlay(double sr, int maxBlock) { transport.prepareToPlay(maxBlock, sr); }
+void CATalogProcessor::prepareToPlay(double sr, int maxBlock) { transport.prepareToPlay(maxBlock * 4 + 16, sr); resampler.prepareToPlay(maxBlock, sr); }
+
+void CATalogProcessor::copyRecent(float* dst, int n) const
+{
+    n = std::min(n, ringSize); const int end = ringPos.load(); for (int i = 0; i < n; ++i) dst[i] = ring[(size_t) ((end - n + i + ringSize * 2) % ringSize)].load(std::memory_order_relaxed);
+}
 
 void CATalogProcessor::processBlock(juce::AudioBuffer<float>& buf, juce::MidiBuffer&)
 {
     juce::ScopedNoDenormals nd;
+    if (auto* ph = getPlayHead()) if (auto pos = ph->getPosition()) if (auto b = pos->getBpm()) seenBpm.store(*b);
+    double r = std::pow(2.0, (double) pitchSt.load() / 12.0);
+    if (syncOn.load() && sampleBpm.load() > 1.f && hostBpm.load() > 1.f) r *= (double) hostBpm.load() / (double) sampleBpm.load();
+    r = juce::jlimit(0.25, 4.0, r); rate.store(r); resampler.setResamplingRatio(r);
     juce::AudioSourceChannelInfo info(&buf, 0, buf.getNumSamples());
-    transport.getNextAudioBlock(info);
+    resampler.getNextAudioBlock(info);
+    buf.applyGain(juce::Decibels::decibelsToGain(volDb.load(), -60.f));
+    const int n = buf.getNumSamples(); float l = 0.f, rr = 0.f; int pos = ringPos.load();
+    for (int i = 0; i < n; ++i)
+    {
+        const float a = buf.getSample(0, i), b = buf.getNumChannels() > 1 ? buf.getSample(1, i) : a; l = std::max(l, std::fabs(a)); rr = std::max(rr, std::fabs(b));
+        ring[(size_t) (pos % ringSize)].store(0.5f * (a + b), std::memory_order_relaxed); ++pos;
+    }
+    ringPos.store(pos % ringSize);
+    peakL.store(std::max(l, peakL.load() * 0.9f)); peakR.store(std::max(rr, peakR.load() * 0.9f));
 }
 
 juce::File CATalogProcessor::metaFile() const

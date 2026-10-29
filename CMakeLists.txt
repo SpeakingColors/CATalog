@@ -18,5 +18,5 @@ juce_add_plugin(CATalog
 target_sources(CATalog PRIVATE src/Plugins.cpp src/catalog/CATalog.cpp src/catalog/CATalogEditor.cpp)
 target_include_directories(CATalog PRIVATE src)
 target_compile_definitions(CATalog PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_USE_MP3AUDIOFORMAT=1)
-target_link_libraries(CATalog PRIVATE cat_ui juce::juce_audio_utils juce::juce_audio_formats juce::juce_gui_extra
+target_link_libraries(CATalog PRIVATE cat_ui juce::juce_audio_utils juce::juce_dsp juce::juce_audio_formats juce::juce_gui_extra
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
