@@ -66,6 +66,7 @@ private:
     juce::ResamplingAudioSource resampler { &transport, false, 2 };
     std::atomic<float> pitchSt { 0.f }, volDb { 0.f }, hostBpm { 128.f }, sampleBpm { 0.f }, peakL { 0.f }, peakR { 0.f }; std::atomic<bool> syncOn { false };
     std::atomic<double> seenBpm { 0.0 }, rate { 1.0 };
+    float lastGain = -1.f;   // audio thread only: gain at the end of the previous block (negative = not set yet)
     static constexpr int ringSize = 4096; std::array<std::atomic<float>, ringSize> ring {}; std::atomic<int> ringPos { 0 };
     juce::AudioFormatManager formats; juce::AudioTransportSource transport; std::unique_ptr<juce::AudioFormatReaderSource> source;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CATalogProcessor)

@@ -24,7 +24,10 @@ void CATalogProcessor::processBlock(juce::AudioBuffer<float>& buf, juce::MidiBuf
     r = juce::jlimit(0.25, 4.0, r); rate.store(r); resampler.setResamplingRatio(r);
     juce::AudioSourceChannelInfo info(&buf, 0, buf.getNumSamples());
     resampler.getNextAudioBlock(info);
-    buf.applyGain(juce::Decibels::decibelsToGain(volDb.load(), -60.f));
+    const float gain = juce::Decibels::decibelsToGain(volDb.load(), -60.f);
+    if (lastGain < 0.f) lastGain = gain;                               // first block: start at the target, no fade-in
+    buf.applyGainRamp(0, buf.getNumSamples(), lastGain, gain);         // glide across the block so a volume move does not click
+    lastGain = gain;
     const int n = buf.getNumSamples(); float l = 0.f, rr = 0.f; int pos = ringPos.load();
     for (int i = 0; i < n; ++i)
     {
