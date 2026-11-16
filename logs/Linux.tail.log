@@ -280,6 +280,7 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/CATalog.h:21:10: note:   by ‘virtual void CATalogProcessor::processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&)’
    21 |     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
       |          ^~~~~~~~~~~~
+[ 35%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_extra/juce_gui_extra.cpp.o
 /home/runner/work/CATalog/CATalog/src/catalog/CATalogEditor.cpp: In member function ‘virtual void {anonymous}::DragPad::mouseDrag(const juce::MouseEvent&)’:
 /home/runner/work/CATalog/CATalog/src/catalog/CATalogEditor.cpp:91:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
    91 |         if (e.getDistanceFromDragStart() < 6 || fileToDrag == nullptr) return; const auto f = fileToDrag();
@@ -353,7 +354,6 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 /home/runner/work/CATalog/CATalog/src/catalog/CATalogEditor.cpp:411:87: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
   411 |         if (genreBox.getSelectedId() > 1) q.genre = genreBox.getText().toStdString(); if (keyBox.getSelectedId() > 1) q.key = keyBox.getText().toStdString();
       |                                                                                       ^~
-[ 35%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_extra/juce_gui_extra.cpp.o
 [ 36%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_basics/juce_gui_basics.cpp.o
 [ 38%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_basics/juce_gui_basics_2.cpp.o
 [ 40%] Building CXX object CMakeFiles/CATalog.dir/_deps/juce-src/modules/juce_gui_basics/juce_gui_basics_3.cpp.o
@@ -378,20 +378,20 @@ In file included from /home/runner/work/CATalog/CATalog/build/_deps/juce-src/mod
 [ 70%] Built target CATalog
 [ 71%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp.o
 [ 73%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp.o
-[ 75%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
-[ 76%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
+[ 75%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
+[ 76%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX_utils.cpp.o
 [ 78%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_ARA.cpp.o
 [ 80%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_ARA.cpp.o
-[ 81%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
-[ 83%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
-[ 86%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
-[ 86%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
-[ 88%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
-[ 90%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
-[ 91%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
-[ 93%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
-[ 95%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
-[ 96%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
+[ 81%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
+[ 83%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
+[ 85%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_LV2.cpp.o
+[ 88%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp.o
+[ 88%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
+[ 90%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
+[ 93%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_Unity.cpp.o
+[ 93%] Building CXX object CMakeFiles/CATalog_Standalone.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
+[ 95%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp.o
+[ 96%] Building CXX object CMakeFiles/CATalog_VST3.dir/_deps/juce-src/modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp.o
 [ 98%] Linking CXX executable CATalog_artefacts/Release/Standalone/CATalog
 [ 98%] Built target CATalog_Standalone
 [100%] Linking CXX shared module CATalog_artefacts/Release/VST3/CATalog.vst3/Contents/x86_64-linux/CATalog.so
